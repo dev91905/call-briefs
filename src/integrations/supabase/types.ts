@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      brief_reads: {
+        Row: {
+          brief_id: string
+          client_user_id: string
+          read_at: string
+        }
+        Insert: {
+          brief_id: string
+          client_user_id: string
+          read_at?: string
+        }
+        Update: {
+          brief_id?: string
+          client_user_id?: string
+          read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_reads_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      briefs: {
+        Row: {
+          analyst_id: string
+          body: string
+          call_date: string | null
+          call_title: string
+          client_id: string
+          created_at: string
+          granola_note_id: string
+          id: string
+          participants: string | null
+          published_at: string | null
+          skip_reason: string | null
+          status: Database["public"]["Enums"]["brief_status"]
+          updated_at: string
+        }
+        Insert: {
+          analyst_id: string
+          body?: string
+          call_date?: string | null
+          call_title: string
+          client_id: string
+          created_at?: string
+          granola_note_id: string
+          id?: string
+          participants?: string | null
+          published_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["brief_status"]
+          updated_at?: string
+        }
+        Update: {
+          analyst_id?: string
+          body?: string
+          call_date?: string | null
+          call_title?: string
+          client_id?: string
+          created_at?: string
+          granola_note_id?: string
+          id?: string
+          participants?: string | null
+          published_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["brief_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -101,81 +193,7 @@ export type Database = {
         }
         Relationships: []
       }
-      legacy_brief_reads: {
-        Row: {
-          brief_id: string
-          client_user_id: string
-          read_at: string
-        }
-        Insert: {
-          brief_id: string
-          client_user_id: string
-          read_at?: string
-        }
-        Update: {
-          brief_id?: string
-          client_user_id?: string
-          read_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "brief_reads_brief_id_fkey"
-            columns: ["brief_id"]
-            isOneToOne: false
-            referencedRelation: "legacy_briefs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      legacy_briefs: {
-        Row: {
-          analyst_id: string
-          body: string
-          call_date: string | null
-          call_title: string
-          client_id: string
-          created_at: string
-          granola_note_id: string
-          id: string
-          participants: string | null
-          published_at: string | null
-          skip_reason: string | null
-          status: Database["public"]["Enums"]["brief_status"]
-          updated_at: string
-        }
-        Insert: {
-          analyst_id: string
-          body?: string
-          call_date?: string | null
-          call_title: string
-          client_id: string
-          created_at?: string
-          granola_note_id: string
-          id?: string
-          participants?: string | null
-          published_at?: string | null
-          skip_reason?: string | null
-          status?: Database["public"]["Enums"]["brief_status"]
-          updated_at?: string
-        }
-        Update: {
-          analyst_id?: string
-          body?: string
-          call_date?: string | null
-          call_title?: string
-          client_id?: string
-          created_at?: string
-          granola_note_id?: string
-          id?: string
-          participants?: string | null
-          published_at?: string | null
-          skip_reason?: string | null
-          status?: Database["public"]["Enums"]["brief_status"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      legacy_folder_mappings: {
+      folder_mappings: {
         Row: {
           analyst_id: string
           client_id: string
@@ -202,7 +220,7 @@ export type Database = {
         }
         Relationships: []
       }
-      legacy_granola_connections: {
+      granola_connections: {
         Row: {
           analyst_id: string
           api_key: string
@@ -226,7 +244,34 @@ export type Database = {
         }
         Relationships: []
       }
-      legacy_requests: {
+      profiles: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_admin: boolean
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          is_admin?: boolean
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean
+        }
+        Relationships: []
+      }
+      requests: {
         Row: {
           brief_id: string | null
           client_id: string
@@ -265,355 +310,10 @@ export type Database = {
             foreignKeyName: "requests_brief_id_fkey"
             columns: ["brief_id"]
             isOneToOne: false
-            referencedRelation: "legacy_briefs"
+            referencedRelation: "briefs"
             referencedColumns: ["id"]
           },
         ]
-      }
-      portal_entries: {
-        Row: {
-          author_id: string | null
-          call_date: string | null
-          created_at: string
-          custom: Json
-          id: string
-          portal_id: string
-          readout: Json | null
-          subject_person_id: string | null
-          talked_to: string | null
-          updated_at: string
-        }
-        Insert: {
-          author_id?: string | null
-          call_date?: string | null
-          created_at?: string
-          custom?: Json
-          id?: string
-          portal_id: string
-          readout?: Json | null
-          subject_person_id?: string | null
-          talked_to?: string | null
-          updated_at?: string
-        }
-        Update: {
-          author_id?: string | null
-          call_date?: string | null
-          created_at?: string
-          custom?: Json
-          id?: string
-          portal_id?: string
-          readout?: Json | null
-          subject_person_id?: string | null
-          talked_to?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_entries_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: false
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_entries_subject_person_id_fkey"
-            columns: ["subject_person_id"]
-            isOneToOne: false
-            referencedRelation: "portal_people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_entry_mentions: {
-        Row: {
-          entry_id: string
-          person_id: string
-        }
-        Insert: {
-          entry_id: string
-          person_id: string
-        }
-        Update: {
-          entry_id?: string
-          person_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_entry_mentions_entry_id_fkey"
-            columns: ["entry_id"]
-            isOneToOne: false
-            referencedRelation: "portal_entries"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_entry_mentions_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "portal_people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_form_schema: {
-        Row: {
-          fields: Json
-          portal_id: string
-          relationship_types: Json
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          fields?: Json
-          portal_id: string
-          relationship_types?: Json
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          fields?: Json
-          portal_id?: string
-          relationship_types?: Json
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_form_schema_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: true
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_members: {
-        Row: {
-          invited_by: string | null
-          joined_at: string
-          portal_id: string
-          role: Database["public"]["Enums"]["portal_role"]
-          user_id: string
-        }
-        Insert: {
-          invited_by?: string | null
-          joined_at?: string
-          portal_id: string
-          role?: Database["public"]["Enums"]["portal_role"]
-          user_id: string
-        }
-        Update: {
-          invited_by?: string | null
-          joined_at?: string
-          portal_id?: string
-          role?: Database["public"]["Enums"]["portal_role"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_members_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: false
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_people: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          email: string | null
-          id: string
-          name: string
-          notes: string | null
-          org: string | null
-          portal_id: string
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          org?: string | null
-          portal_id: string
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          org?: string | null
-          portal_id?: string
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_people_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: false
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_relationships: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          from_person_id: string
-          id: string
-          note: string | null
-          portal_id: string
-          to_person_id: string
-          type: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          from_person_id: string
-          id?: string
-          note?: string | null
-          portal_id: string
-          to_person_id: string
-          type?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          from_person_id?: string
-          id?: string
-          note?: string | null
-          portal_id?: string
-          to_person_id?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_relationships_from_person_id_fkey"
-            columns: ["from_person_id"]
-            isOneToOne: false
-            referencedRelation: "portal_people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_relationships_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: false
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_relationships_to_person_id_fkey"
-            columns: ["to_person_id"]
-            isOneToOne: false
-            referencedRelation: "portal_people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portal_requests: {
-        Row: {
-          body: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          portal_id: string
-          status: string
-          subject: string
-          updated_at: string
-        }
-        Insert: {
-          body?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          portal_id: string
-          status?: string
-          subject: string
-          updated_at?: string
-        }
-        Update: {
-          body?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          portal_id?: string
-          status?: string
-          subject?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "portal_requests_portal_id_fkey"
-            columns: ["portal_id"]
-            isOneToOne: false
-            referencedRelation: "portals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      portals: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          owner_id: string
-          slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          owner_id: string
-          slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          owner_id?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          client_id: string | null
-          created_at: string
-          email: string
-          full_name: string | null
-          id: string
-          is_admin: boolean
-        }
-        Insert: {
-          client_id?: string | null
-          created_at?: string
-          email: string
-          full_name?: string | null
-          id: string
-          is_admin?: boolean
-        }
-        Update: {
-          client_id?: string | null
-          created_at?: string
-          email?: string
-          full_name?: string | null
-          id?: string
-          is_admin?: boolean
-        }
-        Relationships: []
       }
       suppressed_emails: {
         Row: {
@@ -684,10 +384,6 @@ export type Database = {
         Args: { _portal: string; _user: string }
         Returns: boolean
       }
-      is_portal_member: {
-        Args: { _portal: string; _user: string }
-        Returns: boolean
-      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -696,10 +392,6 @@ export type Database = {
           source_queue: string
         }
         Returns: number
-      }
-      portal_member_role: {
-        Args: { _portal: string; _user: string }
-        Returns: Database["public"]["Enums"]["portal_role"]
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -713,7 +405,6 @@ export type Database = {
     Enums: {
       app_role: "analyst" | "client" | "admin"
       brief_status: "draft" | "pending" | "published" | "rejected" | "skipped"
-      portal_role: "owner" | "co_owner" | "analyst"
       request_status: "open" | "resolved"
     }
     CompositeTypes: {
@@ -844,7 +535,6 @@ export const Constants = {
     Enums: {
       app_role: ["analyst", "client", "admin"],
       brief_status: ["draft", "pending", "published", "rejected", "skipped"],
-      portal_role: ["owner", "co_owner", "analyst"],
       request_status: ["open", "resolved"],
     },
   },
