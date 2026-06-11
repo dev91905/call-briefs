@@ -13,7 +13,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedPreviewClientIdRouteImport } from './routes/_authenticated/preview.$clientId'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -37,12 +36,6 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPreviewClientIdRoute =
-  AuthenticatedPreviewClientIdRouteImport.update({
-    id: '/preview/$clientId',
-    path: '/preview/$clientId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -64,7 +57,6 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -73,7 +65,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
-  '/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -84,7 +75,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -95,7 +85,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/settings'
-    | '/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -104,7 +93,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/settings'
     | '/'
-    | '/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -114,7 +102,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/settings'
     | '/_authenticated/'
-    | '/_authenticated/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -158,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/preview/$clientId': {
-      id: '/_authenticated/preview/$clientId'
-      path: '/preview/$clientId'
-      fullPath: '/preview/$clientId'
-      preLoaderRoute: typeof AuthenticatedPreviewClientIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -192,13 +172,11 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedPreviewClientIdRoute: typeof AuthenticatedPreviewClientIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedPreviewClientIdRoute: AuthenticatedPreviewClientIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
