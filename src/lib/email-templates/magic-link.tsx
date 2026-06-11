@@ -13,28 +13,33 @@ import {
 
 interface MagicLinkEmailProps {
   siteName: string
+  token?: string
   confirmationUrl: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
+  token,
   confirmationUrl,
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your login link for {siteName}</Preview>
+    <Preview>{token ? `${token} is your ${siteName} sign-in code` : `Your login code for ${siteName}`}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Heading style={h1}>Your sign-in code</Heading>
         <Text style={text}>
-          Click the button below to log in to {siteName}. This link will expire
-          shortly.
+          Enter this 6-digit code in {siteName} to finish signing in.
+        </Text>
+        {token ? <Text style={codeStyle}>{token}</Text> : null}
+        <Text style={helperText}>
+          If you prefer, you can also continue with the secure link below.
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Log In
+          Continue securely
         </Button>
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          This code will expire shortly. If you didn't request this email, you can safely ignore it.
         </Text>
       </Container>
     </Body>
@@ -55,7 +60,22 @@ const text = {
   fontSize: '14px',
   color: '#55575d',
   lineHeight: '1.5',
-  margin: '0 0 25px',
+   margin: '0 0 18px',
+}
+const codeStyle = {
+  fontFamily: 'Courier, monospace',
+  fontSize: '34px',
+  fontWeight: 'bold' as const,
+  letterSpacing: '0.28em',
+  color: '#000000',
+  textAlign: 'center' as const,
+  margin: '0 0 20px',
+}
+const helperText = {
+  fontSize: '12px',
+  color: '#777777',
+  lineHeight: '1.5',
+  margin: '0 0 20px',
 }
 const button = {
   backgroundColor: '#000000',
