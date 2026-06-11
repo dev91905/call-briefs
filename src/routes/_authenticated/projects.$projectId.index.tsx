@@ -470,6 +470,7 @@ function EntryComposer({
 
   const save = (patch: {
     title?: string;
+    dek?: string | null;
     entryDate?: string | null;
     body?: string;
     peopleIds?: string[];
@@ -481,6 +482,7 @@ function EntryComposer({
   const saveAll = () =>
     save({
       title: title.trim() || "Untitled",
+      dek: dek.trim() ? dek.trim() : null,
       entryDate: entryDate || null,
       body,
       peopleIds: participants.map((p) => p.id),
@@ -495,6 +497,7 @@ function EntryComposer({
         data: {
           id: draft.id,
           title: title.trim() || "Untitled",
+          dek: dek.trim() ? dek.trim() : null,
           entryDate: entryDate || null,
           body,
           peopleIds: participants.map((p) => p.id),
