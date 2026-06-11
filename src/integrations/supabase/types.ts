@@ -14,16 +14,289 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      brief_reads: {
+        Row: {
+          brief_id: string
+          client_user_id: string
+          read_at: string
+        }
+        Insert: {
+          brief_id: string
+          client_user_id: string
+          read_at?: string
+        }
+        Update: {
+          brief_id?: string
+          client_user_id?: string
+          read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brief_reads_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      briefs: {
+        Row: {
+          analyst_id: string
+          body: string
+          call_date: string | null
+          call_title: string
+          client_id: string
+          created_at: string
+          granola_note_id: string
+          id: string
+          participants: string | null
+          published_at: string | null
+          skip_reason: string | null
+          status: Database["public"]["Enums"]["brief_status"]
+          updated_at: string
+        }
+        Insert: {
+          analyst_id: string
+          body?: string
+          call_date?: string | null
+          call_title: string
+          client_id: string
+          created_at?: string
+          granola_note_id: string
+          id?: string
+          participants?: string | null
+          published_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["brief_status"]
+          updated_at?: string
+        }
+        Update: {
+          analyst_id?: string
+          body?: string
+          call_date?: string | null
+          call_title?: string
+          client_id?: string
+          created_at?: string
+          granola_note_id?: string
+          id?: string
+          participants?: string | null
+          published_at?: string | null
+          skip_reason?: string | null
+          status?: Database["public"]["Enums"]["brief_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "briefs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      folder_mappings: {
+        Row: {
+          analyst_id: string
+          client_id: string
+          created_at: string
+          granola_folder_id: string
+          granola_folder_name: string
+          id: string
+        }
+        Insert: {
+          analyst_id: string
+          client_id: string
+          created_at?: string
+          granola_folder_id: string
+          granola_folder_name: string
+          id?: string
+        }
+        Update: {
+          analyst_id?: string
+          client_id?: string
+          created_at?: string
+          granola_folder_id?: string
+          granola_folder_name?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_mappings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      granola_connections: {
+        Row: {
+          analyst_id: string
+          api_key: string
+          created_at: string
+          id: string
+          last_polled_at: string | null
+        }
+        Insert: {
+          analyst_id: string
+          api_key: string
+          created_at?: string
+          id?: string
+          last_polled_at?: string | null
+        }
+        Update: {
+          analyst_id?: string
+          api_key?: string
+          created_at?: string
+          id?: string
+          last_polled_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_admin: boolean
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          is_admin?: boolean
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requests: {
+        Row: {
+          brief_id: string | null
+          client_id: string
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["request_status"]
+        }
+        Insert: {
+          brief_id?: string | null
+          client_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          message: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+        }
+        Update: {
+          brief_id?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requests_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "analyst" | "client" | "admin"
+      brief_status: "pending" | "published" | "rejected" | "skipped"
+      request_status: "open" | "resolved"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +423,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["analyst", "client", "admin"],
+      brief_status: ["pending", "published", "rejected", "skipped"],
+      request_status: ["open", "resolved"],
+    },
   },
 } as const
