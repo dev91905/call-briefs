@@ -165,10 +165,10 @@ function TopBar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const isAnalyst = session?.role === "analyst" || session?.role === "admin";
+  const openCount = useOpenRequestCount(!!session && isAnalyst).data ?? 0;
 
   if (!session) return null;
-  const isAnalyst = session.role === "analyst" || session.role === "admin";
-  const openCount = useOpenRequestCount(isAnalyst).data ?? 0;
 
   const tabs = isAnalyst
     ? [
