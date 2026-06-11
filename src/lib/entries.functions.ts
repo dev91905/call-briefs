@@ -23,7 +23,7 @@ async function loadEntries(supabase: any, opts: { projectId?: string; status?: "
     .from("entries")
     .select(
       "id, project_id, author_id, title, entry_date, body, status, published_at, updated_at, created_at, " +
-        "projects!inner(name), profiles!entries_author_id_fkey(full_name, email), " +
+        "projects!inner(name), " +
         "entry_people(person_id, people!inner(id, full_name))",
     );
   if (opts.projectId) query = query.eq("project_id", opts.projectId);
@@ -31,27 +31,43 @@ async function loadEntries(supabase: any, opts: { projectId?: string; status?: "
   if (opts.authorId) query = query.eq("author_id", opts.authorId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return ((data ?? []) as any[]).map(
-    (r): EntryListItem => ({
-      id: r.id,
-      projectId: r.project_id,
-      projectName: r.projects?.name ?? "",
-      authorId: r.author_id,
-      authorName: r.profiles?.full_name ?? r.profiles?.email ?? null,
-      title: r.title,
-      entryDate: r.entry_date,
-      body: r.body ?? "",
-      status: r.status,
-      publishedAt: r.published_at,
-      updatedAt: r.updated_at,
-      createdAt: r.created_at,
-      people: (r.entry_people ?? []).map((ep: any) => ({
-        id: ep.people.id,
-        fullName: ep.people.full_name,
-      })),
-    }),
+  const rows = (data ?? []) as any[];
+  const authorIds = Array.from(new Set(rows.map((r) => r.author_id).filter(Boolean)));
+  let profileMap = new Map<string, { full_name: string | null; email: string | null }>();
+  if (authorIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", authorIds);
+    for (const p of (profiles ?? []) as any[]) {
+      profileMap.set(p.id, { full_name: p.full_name, email: p.email });
+    }
+  }
+  return rows.map(
+    (r): EntryListItem => {
+      const p = profileMap.get(r.author_id);
+      return {
+        id: r.id,
+        projectId: r.project_id,
+        projectName: r.projects?.name ?? "",
+        authorId: r.author_id,
+        authorName: p?.full_name ?? p?.email ?? null,
+        title: r.title,
+        entryDate: r.entry_date,
+        body: r.body ?? "",
+        status: r.status,
+        publishedAt: r.published_at,
+        updatedAt: r.updated_at,
+        createdAt: r.created_at,
+        people: (r.entry_people ?? []).map((ep: any) => ({
+          id: ep.people.id,
+          fullName: ep.people.full_name,
+        })),
+      };
+    },
   );
 }
+
 
 export const listProjectEntries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -83,7 +99,7 @@ export const getEntry = createServerFn({ method: "POST" })
       .from("entries")
       .select(
         "id, project_id, author_id, title, entry_date, body, status, published_at, updated_at, created_at, " +
-          "projects!inner(name), profiles!entries_author_id_fkey(full_name, email), " +
+          "projects!inner(name), " +
           "entry_people(person_id, people!inner(id, full_name))",
       )
       .eq("id", data.id)
@@ -91,12 +107,21 @@ export const getEntry = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Not found");
     const r = row as any;
+    let authorName: string | null = null;
+    if (r.author_id) {
+      const { data: p } = await context.supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", r.author_id)
+        .maybeSingle();
+      authorName = (p as any)?.full_name ?? (p as any)?.email ?? null;
+    }
     return {
       id: r.id,
       projectId: r.project_id,
       projectName: r.projects?.name ?? "",
       authorId: r.author_id,
-      authorName: r.profiles?.full_name ?? r.profiles?.email ?? null,
+      authorName,
       title: r.title,
       entryDate: r.entry_date,
       body: r.body ?? "",
@@ -110,6 +135,7 @@ export const getEntry = createServerFn({ method: "POST" })
       })),
     };
   });
+
 
 export const createDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
