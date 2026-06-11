@@ -29,7 +29,7 @@ export const MagicLinkEmail = ({
       <Container style={container}>
         <Heading style={h1}>Your sign-in code</Heading>
         <Text style={text}>
-          Enter this 6-digit code in {siteName} to finish signing in.
+          Enter this 8-digit code in {siteName} to finish signing in.
         </Text>
         {token ? <Text style={codeStyle}>{token}</Text> : null}
         <Text style={helperText}>
