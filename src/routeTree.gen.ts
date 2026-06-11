@@ -15,9 +15,15 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPortalsNewRouteImport } from './routes/_authenticated/portals.new'
 import { Route as AuthenticatedPortalsPortalIdRouteImport } from './routes/_authenticated/portals.$portalId'
+import { Route as AuthenticatedPortalsPortalIdIndexRouteImport } from './routes/_authenticated/portals.$portalId.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as AuthenticatedPortalsPortalIdSettingsRouteImport } from './routes/_authenticated/portals.$portalId.settings'
+import { Route as AuthenticatedPortalsPortalIdRequestsRouteImport } from './routes/_authenticated/portals.$portalId.requests'
+import { Route as AuthenticatedPortalsPortalIdPeopleRouteImport } from './routes/_authenticated/portals.$portalId.people'
+import { Route as AuthenticatedPortalsPortalIdMapRouteImport } from './routes/_authenticated/portals.$portalId.map'
+import { Route as AuthenticatedPortalsPortalIdPeoplePersonIdRouteImport } from './routes/_authenticated/portals.$portalId.people.$personId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -49,6 +55,12 @@ const AuthenticatedPortalsPortalIdRoute =
     path: '/portals/$portalId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPortalsPortalIdIndexRoute =
+  AuthenticatedPortalsPortalIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPortalsPortalIdRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -65,26 +77,67 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPortalsPortalIdSettingsRoute =
+  AuthenticatedPortalsPortalIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedPortalsPortalIdRoute,
+  } as any)
+const AuthenticatedPortalsPortalIdRequestsRoute =
+  AuthenticatedPortalsPortalIdRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => AuthenticatedPortalsPortalIdRoute,
+  } as any)
+const AuthenticatedPortalsPortalIdPeopleRoute =
+  AuthenticatedPortalsPortalIdPeopleRouteImport.update({
+    id: '/people',
+    path: '/people',
+    getParentRoute: () => AuthenticatedPortalsPortalIdRoute,
+  } as any)
+const AuthenticatedPortalsPortalIdMapRoute =
+  AuthenticatedPortalsPortalIdMapRouteImport.update({
+    id: '/map',
+    path: '/map',
+    getParentRoute: () => AuthenticatedPortalsPortalIdRoute,
+  } as any)
+const AuthenticatedPortalsPortalIdPeoplePersonIdRoute =
+  AuthenticatedPortalsPortalIdPeoplePersonIdRouteImport.update({
+    id: '/$personId',
+    path: '/$personId',
+    getParentRoute: () => AuthenticatedPortalsPortalIdPeopleRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
+  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdRouteWithChildren
   '/portals/new': typeof AuthenticatedPortalsNewRoute
+  '/portals/$portalId/map': typeof AuthenticatedPortalsPortalIdMapRoute
+  '/portals/$portalId/people': typeof AuthenticatedPortalsPortalIdPeopleRouteWithChildren
+  '/portals/$portalId/requests': typeof AuthenticatedPortalsPortalIdRequestsRoute
+  '/portals/$portalId/settings': typeof AuthenticatedPortalsPortalIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/portals/$portalId/': typeof AuthenticatedPortalsPortalIdIndexRoute
+  '/portals/$portalId/people/$personId': typeof AuthenticatedPortalsPortalIdPeoplePersonIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
-  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
   '/portals/new': typeof AuthenticatedPortalsNewRoute
+  '/portals/$portalId/map': typeof AuthenticatedPortalsPortalIdMapRoute
+  '/portals/$portalId/people': typeof AuthenticatedPortalsPortalIdPeopleRouteWithChildren
+  '/portals/$portalId/requests': typeof AuthenticatedPortalsPortalIdRequestsRoute
+  '/portals/$portalId/settings': typeof AuthenticatedPortalsPortalIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdIndexRoute
+  '/portals/$portalId/people/$personId': typeof AuthenticatedPortalsPortalIdPeoplePersonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,11 +145,17 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
+  '/_authenticated/portals/$portalId': typeof AuthenticatedPortalsPortalIdRouteWithChildren
   '/_authenticated/portals/new': typeof AuthenticatedPortalsNewRoute
+  '/_authenticated/portals/$portalId/map': typeof AuthenticatedPortalsPortalIdMapRoute
+  '/_authenticated/portals/$portalId/people': typeof AuthenticatedPortalsPortalIdPeopleRouteWithChildren
+  '/_authenticated/portals/$portalId/requests': typeof AuthenticatedPortalsPortalIdRequestsRoute
+  '/_authenticated/portals/$portalId/settings': typeof AuthenticatedPortalsPortalIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/_authenticated/portals/$portalId/': typeof AuthenticatedPortalsPortalIdIndexRoute
+  '/_authenticated/portals/$portalId/people/$personId': typeof AuthenticatedPortalsPortalIdPeoplePersonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,19 +165,30 @@ export interface FileRouteTypes {
     | '/settings'
     | '/portals/$portalId'
     | '/portals/new'
+    | '/portals/$portalId/map'
+    | '/portals/$portalId/people'
+    | '/portals/$portalId/requests'
+    | '/portals/$portalId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/portals/$portalId/'
+    | '/portals/$portalId/people/$personId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/settings'
     | '/'
-    | '/portals/$portalId'
     | '/portals/new'
+    | '/portals/$portalId/map'
+    | '/portals/$portalId/people'
+    | '/portals/$portalId/requests'
+    | '/portals/$portalId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/portals/$portalId'
+    | '/portals/$portalId/people/$personId'
   id:
     | '__root__'
     | '/_authenticated'
@@ -127,9 +197,15 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/portals/$portalId'
     | '/_authenticated/portals/new'
+    | '/_authenticated/portals/$portalId/map'
+    | '/_authenticated/portals/$portalId/people'
+    | '/_authenticated/portals/$portalId/requests'
+    | '/_authenticated/portals/$portalId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/_authenticated/portals/$portalId/'
+    | '/_authenticated/portals/$portalId/people/$personId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalsPortalIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/portals/$portalId/': {
+      id: '/_authenticated/portals/$portalId/'
+      path: '/'
+      fullPath: '/portals/$portalId/'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdIndexRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -205,20 +288,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portals/$portalId/settings': {
+      id: '/_authenticated/portals/$portalId/settings'
+      path: '/settings'
+      fullPath: '/portals/$portalId/settings'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdSettingsRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdRoute
+    }
+    '/_authenticated/portals/$portalId/requests': {
+      id: '/_authenticated/portals/$portalId/requests'
+      path: '/requests'
+      fullPath: '/portals/$portalId/requests'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdRequestsRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdRoute
+    }
+    '/_authenticated/portals/$portalId/people': {
+      id: '/_authenticated/portals/$portalId/people'
+      path: '/people'
+      fullPath: '/portals/$portalId/people'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdPeopleRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdRoute
+    }
+    '/_authenticated/portals/$portalId/map': {
+      id: '/_authenticated/portals/$portalId/map'
+      path: '/map'
+      fullPath: '/portals/$portalId/map'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdMapRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdRoute
+    }
+    '/_authenticated/portals/$portalId/people/$personId': {
+      id: '/_authenticated/portals/$portalId/people/$personId'
+      path: '/$personId'
+      fullPath: '/portals/$portalId/people/$personId'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdPeoplePersonIdRouteImport
+      parentRoute: typeof AuthenticatedPortalsPortalIdPeopleRoute
+    }
   }
 }
+
+interface AuthenticatedPortalsPortalIdPeopleRouteChildren {
+  AuthenticatedPortalsPortalIdPeoplePersonIdRoute: typeof AuthenticatedPortalsPortalIdPeoplePersonIdRoute
+}
+
+const AuthenticatedPortalsPortalIdPeopleRouteChildren: AuthenticatedPortalsPortalIdPeopleRouteChildren =
+  {
+    AuthenticatedPortalsPortalIdPeoplePersonIdRoute:
+      AuthenticatedPortalsPortalIdPeoplePersonIdRoute,
+  }
+
+const AuthenticatedPortalsPortalIdPeopleRouteWithChildren =
+  AuthenticatedPortalsPortalIdPeopleRoute._addFileChildren(
+    AuthenticatedPortalsPortalIdPeopleRouteChildren,
+  )
+
+interface AuthenticatedPortalsPortalIdRouteChildren {
+  AuthenticatedPortalsPortalIdMapRoute: typeof AuthenticatedPortalsPortalIdMapRoute
+  AuthenticatedPortalsPortalIdPeopleRoute: typeof AuthenticatedPortalsPortalIdPeopleRouteWithChildren
+  AuthenticatedPortalsPortalIdRequestsRoute: typeof AuthenticatedPortalsPortalIdRequestsRoute
+  AuthenticatedPortalsPortalIdSettingsRoute: typeof AuthenticatedPortalsPortalIdSettingsRoute
+  AuthenticatedPortalsPortalIdIndexRoute: typeof AuthenticatedPortalsPortalIdIndexRoute
+}
+
+const AuthenticatedPortalsPortalIdRouteChildren: AuthenticatedPortalsPortalIdRouteChildren =
+  {
+    AuthenticatedPortalsPortalIdMapRoute: AuthenticatedPortalsPortalIdMapRoute,
+    AuthenticatedPortalsPortalIdPeopleRoute:
+      AuthenticatedPortalsPortalIdPeopleRouteWithChildren,
+    AuthenticatedPortalsPortalIdRequestsRoute:
+      AuthenticatedPortalsPortalIdRequestsRoute,
+    AuthenticatedPortalsPortalIdSettingsRoute:
+      AuthenticatedPortalsPortalIdSettingsRoute,
+    AuthenticatedPortalsPortalIdIndexRoute:
+      AuthenticatedPortalsPortalIdIndexRoute,
+  }
+
+const AuthenticatedPortalsPortalIdRouteWithChildren =
+  AuthenticatedPortalsPortalIdRoute._addFileChildren(
+    AuthenticatedPortalsPortalIdRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedPortalsPortalIdRoute: typeof AuthenticatedPortalsPortalIdRoute
+  AuthenticatedPortalsPortalIdRoute: typeof AuthenticatedPortalsPortalIdRouteWithChildren
   AuthenticatedPortalsNewRoute: typeof AuthenticatedPortalsNewRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedPortalsPortalIdRoute: AuthenticatedPortalsPortalIdRoute,
+  AuthenticatedPortalsPortalIdRoute:
+    AuthenticatedPortalsPortalIdRouteWithChildren,
   AuthenticatedPortalsNewRoute: AuthenticatedPortalsNewRoute,
 }
 
