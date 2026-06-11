@@ -402,7 +402,7 @@ function ClientFeed() {
                 {b.callDate ? formatCallDate(b.callDate) : relativeTime(b.publishedAt)}
                 {b.participants ? ` · ${b.participants}` : ""}
               </div>
-              <MarkdownBody source={b.body} />
+              <MarkdownBody body={b.body} />
             </article>
           ))}
         </div>
