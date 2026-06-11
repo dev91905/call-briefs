@@ -34,15 +34,14 @@ function renderInline(text: string, projectId: string | undefined): ReactNode[] 
           key={`m-${key++}`}
           to="/projects/$projectId/people/$personId"
           params={{ projectId, personId }}
-          className="rounded px-1"
-          style={{ background: "var(--surface-raised)", color: "var(--text)", textDecoration: "none" }}
+          className="ref-link"
         >
           @{label}
         </Link>,
       );
     } else {
       parts.push(
-        <span key={`m-${key++}`} className="rounded px-1" style={{ background: "var(--surface-raised)" }}>
+        <span key={`m-${key++}`} className="ref-link">
           @{label}
         </span>,
       );
