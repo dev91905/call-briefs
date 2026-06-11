@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getPersonDetail, deletePerson } from "@/lib/people.functions";
 import { getProject } from "@/lib/projects.functions";
-import { relativeTime, formatCallDate } from "@/lib/format";
+import { formatCallDate } from "@/lib/format";
 import { ProjectEntryCard } from "@/components/portal/ProjectEntryCard";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/people/$personId")({
@@ -69,7 +69,7 @@ function PersonDetailPage() {
             ))}
           </div>
           <div className="mt-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
-            First seen {formatCallDate(q.data.createdAt)}
+            First seen {formatCallDate(q.data.firstSeen)}
             {q.data.addedBy ? ` · added by ${q.data.addedBy}` : ""}
             {` · in ${q.data.entryCount} ${q.data.entryCount === 1 ? "entry" : "entries"}`}
           </div>
