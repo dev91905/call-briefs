@@ -648,7 +648,7 @@ function EntryComposer({
         </button>
         <button
           onClick={handlePublish}
-          disabled={!canPublish || publish.isPending || update.isPending}
+          disabled={!canPublish || publish.isPending}
           className="h-10 rounded-md px-5 text-[13px] font-medium disabled:opacity-50"
           style={{ background: "var(--text)", color: "#000" }}
         >
