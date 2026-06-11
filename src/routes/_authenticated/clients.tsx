@@ -130,6 +130,15 @@ function ClientRow({
         >
           Preview as client →
         </Link>
+        <button
+          onClick={onDelete}
+          aria-label="Delete client"
+          title="Delete client"
+          className="shrink-0 rounded-md px-2.5 py-1 text-[12px]"
+          style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--destructive, #f43f5e)" }}
+        >
+          Delete
+        </button>
       </div>
 
       <div className="mb-3">
