@@ -201,6 +201,52 @@ export const getClientFeed = createServerFn({ method: "GET" })
     return { briefs, clientName: ((profile as any).clients?.name) ?? null };
   });
 
+// Analyst/admin: preview a specific client's feed
+export const previewClientFeed = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ clientId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    // Authorize: only analysts/admins can preview other clients' feeds.
+    const { data: profile } = await context.supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const { data: roleRows } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const roles = (roleRows ?? []).map((r: any) => r.role as string);
+    const allowed = profile?.is_admin || roles.includes("admin") || roles.includes("analyst");
+    if (!allowed) throw new Error("Forbidden");
+
+    const { data: client } = await context.supabase
+      .from("clients")
+      .select("name")
+      .eq("id", data.clientId)
+      .maybeSingle();
+
+    const { data: rows, error } = await context.supabase
+      .from("briefs")
+      .select("id, call_title, call_date, participants, body, published_at")
+      .eq("client_id", data.clientId)
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
+    if (error) throw new Error(error.message);
+
+    return {
+      clientName: client?.name ?? null,
+      briefs: (rows ?? []).map((b: any) => ({
+        id: b.id,
+        callTitle: b.call_title,
+        callDate: b.call_date,
+        participants: b.participants ?? "",
+        body: b.body ?? "",
+        publishedAt: b.published_at,
+      })),
+    };
+  });
+
 export const markBriefRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ briefId: z.string().uuid() }).parse(input))
