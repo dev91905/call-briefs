@@ -259,7 +259,7 @@ function PublishedEntry({ e }: { e: EntryListItem }) {
                 <Link
                   to="/projects/$projectId/people/$personId"
                   params={{ projectId, personId: p.id }}
-                  onClick={(ev) => ev.stopPropagation()}
+                  onClick={(ev: any) => ev.stopPropagation()}
                   className="ref-link"
                 >
                   {p.fullName}
@@ -278,7 +278,7 @@ function PublishedEntry({ e }: { e: EntryListItem }) {
                 <Link
                   to="/projects/$projectId/groups/$groupId"
                   params={{ projectId, groupId: g.id }}
-                  onClick={(ev) => ev.stopPropagation()}
+                  onClick={(ev: any) => ev.stopPropagation()}
                   className="ref-link"
                 >
                   {g.name}
@@ -292,7 +292,7 @@ function PublishedEntry({ e }: { e: EntryListItem }) {
         <p className="mt-3 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
       )}
       {open && (
-        <div className="mt-4" onClick={(ev) => ev.stopPropagation()}>
+        <div className="mt-4" onClick={(ev: any) => ev.stopPropagation()}>
           {e.dek && (
             <p className="mb-4 text-[15px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
           )}
