@@ -613,7 +613,19 @@ function EntryComposer({
             />
           </div>
         </div>
+        <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <span>Dek</span>
+          <input
+            value={dek}
+            onChange={(e) => setDek(e.target.value)}
+            onBlur={() => save({ dek: dek.trim() ? dek.trim() : null })}
+            placeholder="One-line summary for the feed — optional"
+            className="flex-1 bg-transparent text-[13px] outline-none"
+            style={{ color: "var(--text)" }}
+          />
+        </div>
       </div>
+
 
       <TiptapBodyEditor
         projectId={projectId}
