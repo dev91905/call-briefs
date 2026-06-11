@@ -136,11 +136,38 @@ export const getGroup = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("groups")
-      .select("id, name")
+      .select("id, name, created_at, created_by")
       .eq("id", data.groupId)
       .eq("project_id", data.projectId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Not found");
-    return { id: row.id, name: row.name };
+
+    const [{ data: links }, { data: creator }] = await Promise.all([
+      context.supabase
+        .from("entry_groups")
+        .select("entries!inner(id, status, published_at)")
+        .eq("group_id", data.groupId),
+      context.supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", row.created_by)
+        .maybeSingle(),
+    ]);
+
+    const published = ((links ?? []) as any[])
+      .map((l) => l.entries)
+      .filter((e) => e && e.status === "published");
+    const lastActivity = published
+      .map((e) => e.published_at as string | null)
+      .filter(Boolean)
+      .sort((a, b) => (b ?? "").localeCompare(a ?? ""))[0] ?? null;
+
+    return {
+      id: row.id,
+      name: row.name,
+      entryCount: published.length,
+      createdBy: creator?.full_name ?? creator?.email ?? null,
+      lastActivity,
+    };
   });
