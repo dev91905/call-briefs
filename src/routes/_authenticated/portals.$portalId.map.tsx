@@ -31,7 +31,7 @@ function MapPage() {
       style={{ border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden", background: "#0a0a0a", height: 600 }}
     >
       <Suspense fallback={<div className="p-6 text-[12px]" style={{ color: "var(--text-faint)" }}>Loading graph…</div>}>
-        {/* @ts-expect-error - lazy default typing */}
+        
         <ForceGraph2D
           graphData={{ nodes: data.nodes.map((n: any) => ({ ...n })), links: data.links.map((l: any) => ({ ...l })) }}
           backgroundColor="#0a0a0a"
