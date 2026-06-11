@@ -94,6 +94,7 @@ function ClientRow({
   client,
   onRename,
   onInvite,
+  onDelete,
 }: {
   client: {
     id: string;
@@ -103,6 +104,7 @@ function ClientRow({
   };
   onRename: (name: string) => void;
   onInvite: (email: string) => void;
+  onDelete: () => void;
 }) {
   const [name, setName] = useState(client.name);
   const [email, setEmail] = useState("");
