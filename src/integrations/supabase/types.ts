@@ -86,32 +86,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["brief_status"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "briefs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      clients: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
         Relationships: []
       }
       email_send_log: {
@@ -226,15 +200,7 @@ export type Database = {
           granola_folder_name?: string
           id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "folder_mappings_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       granola_connections: {
         Row: {
@@ -285,15 +251,7 @@ export type Database = {
           id?: string
           is_admin?: boolean
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       requests: {
         Row: {
@@ -335,13 +293,6 @@ export type Database = {
             columns: ["brief_id"]
             isOneToOne: false
             referencedRelation: "briefs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -409,6 +360,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_portal_admin: {
+        Args: { _portal: string; _user: string }
         Returns: boolean
       }
       move_to_dlq: {
