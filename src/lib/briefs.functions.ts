@@ -2,20 +2,49 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+async function getClientNameMap(supabase: any, clientIds: (string | null | undefined)[]) {
+  const ids = Array.from(new Set(clientIds.filter(Boolean))) as string[];
+  if (ids.length === 0) return new Map<string, string>();
+  const { data } = await supabase.from("clients").select("id, name").in("id", ids);
+  return new Map<string, string>(
+    (data ?? []).map((client: any) => [String(client.id), String(client.name ?? "—")]),
+  );
+}
+
+export type BriefListItem = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  callTitle: string;
+  callDate: string | null;
+  participants: string;
+  body: string;
+};
+
+export type PublishedBriefListItem = BriefListItem & {
+  publishedAt: string | null;
+  hasReads: boolean;
+};
+
+export type DraftBriefListItem = BriefListItem & {
+  updatedAt: string;
+};
+
 export const getPendingBriefs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("briefs")
-      .select("id, client_id, call_title, call_date, participants, body, status, created_at, clients(name)")
+      .select("id, client_id, call_title, call_date, participants, body, status, created_at")
       .eq("analyst_id", context.userId)
       .eq("status", "pending")
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((b: any) => ({
+    const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
+    return (data ?? []).map((b: any): BriefListItem & { createdAt: string } => ({
       id: b.id,
       clientId: b.client_id,
-      clientName: b.clients?.name ?? "—",
+      clientName: clientNameById.get(b.client_id) ?? "—",
       callTitle: b.call_title,
       callDate: b.call_date,
       participants: b.participants ?? "",
@@ -29,15 +58,16 @@ export const getPublishedBriefs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("briefs")
-      .select("id, client_id, call_title, call_date, participants, body, published_at, clients(name), brief_reads(client_user_id)")
+      .select("id, client_id, call_title, call_date, participants, body, published_at, brief_reads(client_user_id)")
       .eq("analyst_id", context.userId)
       .eq("status", "published")
       .order("published_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((b: any) => ({
+    const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
+    return (data ?? []).map((b: any): PublishedBriefListItem => ({
       id: b.id,
       clientId: b.client_id,
-      clientName: b.clients?.name ?? "—",
+      clientName: clientNameById.get(b.client_id) ?? "—",
       callTitle: b.call_title,
       callDate: b.call_date,
       participants: b.participants ?? "",
@@ -77,15 +107,16 @@ export const getDrafts = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("briefs")
-      .select("id, client_id, call_title, call_date, participants, body, created_at, updated_at, clients(name)")
+      .select("id, client_id, call_title, call_date, participants, body, created_at, updated_at")
       .eq("analyst_id", context.userId)
       .eq("status", "draft")
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((b: any) => ({
+    const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
+    return (data ?? []).map((b: any): DraftBriefListItem => ({
       id: b.id,
       clientId: b.client_id,
-      clientName: b.clients?.name ?? "—",
+      clientName: clientNameById.get(b.client_id) ?? "—",
       callTitle: b.call_title,
       callDate: b.call_date,
       participants: b.participants ?? "",
@@ -176,10 +207,16 @@ export const getClientFeed = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data: profile } = await context.supabase
       .from("profiles")
-      .select("client_id, clients(name)")
+      .select("client_id")
       .eq("id", context.userId)
       .maybeSingle();
     if (!profile?.client_id) return { briefs: [], clientName: null as string | null };
+
+    const { data: client } = await context.supabase
+      .from("clients")
+      .select("name")
+      .eq("id", profile.client_id)
+      .maybeSingle();
 
     const { data, error } = await context.supabase
       .from("briefs")
@@ -198,7 +235,7 @@ export const getClientFeed = createServerFn({ method: "GET" })
       publishedAt: b.published_at,
       isRead: (b.brief_reads ?? []).some((r: any) => r.client_user_id === context.userId),
     }));
-    return { briefs, clientName: ((profile as any).clients?.name) ?? null };
+    return { briefs, clientName: client?.name ?? null };
   });
 
 // Analyst/admin: preview a specific client's feed

@@ -28,7 +28,13 @@ export const listClientsAdmin = createServerFn({ method: "GET" })
 
     const { data: mappings } = await supabaseAdmin
       .from("folder_mappings")
-      .select("client_id, analyst_id, profiles:profiles!folder_mappings_analyst_id_fkey(email)");
+      .select("client_id, analyst_id");
+
+    const analystIds = Array.from(new Set((mappings ?? []).map((m: any) => m.analyst_id).filter(Boolean)));
+    const { data: analystProfiles } = analystIds.length
+      ? await supabaseAdmin.from("profiles").select("id, email").in("id", analystIds)
+      : { data: [] };
+    const analystEmailById = new Map((analystProfiles ?? []).map((p: any) => [p.id, p.email]));
 
     const roleByUser = new Map<string, string[]>();
     (roles ?? []).forEach((r: any) => {
@@ -45,7 +51,7 @@ export const listClientsAdmin = createServerFn({ method: "GET" })
         new Set(
           (mappings ?? [])
             .filter((m: any) => m.client_id === c.id)
-            .map((m: any) => m.profiles?.email)
+            .map((m: any) => analystEmailById.get(m.analyst_id))
             .filter(Boolean),
         ),
       );
