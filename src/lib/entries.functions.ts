@@ -213,6 +213,7 @@ export const createDraft = createServerFn({ method: "POST" })
 const UpdateInput = z.object({
   id: z.string().uuid(),
   title: z.string().max(500).optional(),
+  dek: z.string().max(500).nullable().optional(),
   entryDate: z.string().nullable().optional(),
   body: z.string().max(50000).optional(),
   peopleIds: z.array(z.string().uuid()).optional(),
