@@ -69,11 +69,11 @@ export function MarkdownBody({ body, className = "" }: { body: string; className
     if (!trimmed) return;
 
     if (trimmed.startsWith("### ")) {
-      out.push(<h3 key={bi} className="mt-4 text-[16px] font-medium" style={{ color: "var(--text)" }}>{renderInline(trimmed.slice(4), projectId)}</h3>);
+      out.push(<h3 key={bi} className="mt-4 font-medium" style={{ fontSize: 15, fontWeight: 500, color: "var(--text)" }}>{renderInline(trimmed.slice(4), projectId)}</h3>);
     } else if (trimmed.startsWith("## ")) {
-      out.push(<h2 key={bi} className="mt-5 text-[18px] font-medium" style={{ color: "var(--text)" }}>{renderInline(trimmed.slice(3), projectId)}</h2>);
+      out.push(<h2 key={bi} className="mt-5 font-medium" style={{ fontSize: 17, fontWeight: 500, color: "var(--text)" }}>{renderInline(trimmed.slice(3), projectId)}</h2>);
     } else if (trimmed.startsWith("# ")) {
-      out.push(<h1 key={bi} className="mt-5 text-[20px] font-medium" style={{ color: "var(--text)" }}>{renderInline(trimmed.slice(2), projectId)}</h1>);
+      out.push(<h1 key={bi} className="mt-5 font-medium" style={{ fontSize: 20, fontWeight: 500, color: "var(--text)" }}>{renderInline(trimmed.slice(2), projectId)}</h1>);
     } else if (/^[-*] /.test(trimmed)) {
       const items = trimmed
         .split("\n")
