@@ -18,6 +18,8 @@ import { Route as AuthenticatedQueueRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedPublishedRouteImport } from './routes/_authenticated/published'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedPreviewClientIdRouteImport } from './routes/_authenticated/preview.$clientId'
+import { Route as AuthenticatedPortalsNewRouteImport } from './routes/_authenticated/portals.new'
+import { Route as AuthenticatedPortalsPortalIdRouteImport } from './routes/_authenticated/portals.$portalId'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -67,6 +69,17 @@ const AuthenticatedPreviewClientIdRoute =
     path: '/preview/$clientId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPortalsNewRoute = AuthenticatedPortalsNewRouteImport.update({
+  id: '/portals/new',
+  path: '/portals/new',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPortalsPortalIdRoute =
+  AuthenticatedPortalsPortalIdRouteImport.update({
+    id: '/portals/$portalId',
+    path: '/portals/$portalId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -92,6 +105,8 @@ export interface FileRoutesByFullPath {
   '/queue': typeof AuthenticatedQueueRoute
   '/requests': typeof AuthenticatedRequestsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
+  '/portals/new': typeof AuthenticatedPortalsNewRoute
   '/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -105,6 +120,8 @@ export interface FileRoutesByTo {
   '/requests': typeof AuthenticatedRequestsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
+  '/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
+  '/portals/new': typeof AuthenticatedPortalsNewRoute
   '/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -120,6 +137,8 @@ export interface FileRoutesById {
   '/_authenticated/requests': typeof AuthenticatedRequestsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/portals/$portalId': typeof AuthenticatedPortalsPortalIdRoute
+  '/_authenticated/portals/new': typeof AuthenticatedPortalsNewRoute
   '/_authenticated/preview/$clientId': typeof AuthenticatedPreviewClientIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -135,6 +154,8 @@ export interface FileRouteTypes {
     | '/queue'
     | '/requests'
     | '/settings'
+    | '/portals/$portalId'
+    | '/portals/new'
     | '/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -148,6 +169,8 @@ export interface FileRouteTypes {
     | '/requests'
     | '/settings'
     | '/'
+    | '/portals/$portalId'
+    | '/portals/new'
     | '/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -162,6 +185,8 @@ export interface FileRouteTypes {
     | '/_authenticated/requests'
     | '/_authenticated/settings'
     | '/_authenticated/'
+    | '/_authenticated/portals/$portalId'
+    | '/_authenticated/portals/new'
     | '/_authenticated/preview/$clientId'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -241,6 +266,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPreviewClientIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/portals/new': {
+      id: '/_authenticated/portals/new'
+      path: '/portals/new'
+      fullPath: '/portals/new'
+      preLoaderRoute: typeof AuthenticatedPortalsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/portals/$portalId': {
+      id: '/_authenticated/portals/$portalId'
+      path: '/portals/$portalId'
+      fullPath: '/portals/$portalId'
+      preLoaderRoute: typeof AuthenticatedPortalsPortalIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -272,6 +311,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRequestsRoute: typeof AuthenticatedRequestsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedPortalsPortalIdRoute: typeof AuthenticatedPortalsPortalIdRoute
+  AuthenticatedPortalsNewRoute: typeof AuthenticatedPortalsNewRoute
   AuthenticatedPreviewClientIdRoute: typeof AuthenticatedPreviewClientIdRoute
 }
 
@@ -282,6 +323,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRequestsRoute: AuthenticatedRequestsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedPortalsPortalIdRoute: AuthenticatedPortalsPortalIdRoute,
+  AuthenticatedPortalsNewRoute: AuthenticatedPortalsNewRoute,
   AuthenticatedPreviewClientIdRoute: AuthenticatedPreviewClientIdRoute,
 }
 
