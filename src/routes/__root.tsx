@@ -258,10 +258,11 @@ function TopBar() {
 function BottomBar() {
   const { data: session } = useSession();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const isAnalyst = session?.role === "analyst" || session?.role === "admin";
+  const openCount = useOpenRequestCount(!!session && isAnalyst).data ?? 0;
+
   if (!session) return null;
-  const isAnalyst = session.role === "analyst" || session.role === "admin";
   if (!isAnalyst) return null;
-  const openCount = useOpenRequestCount(true).data ?? 0;
 
   const tabs = [
     { to: "/", label: "Queue" },
