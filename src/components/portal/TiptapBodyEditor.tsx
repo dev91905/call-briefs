@@ -120,9 +120,9 @@ export function TiptapBodyEditor({
       <style>{`
         .tiptap-body { min-height: 240px; outline: none; font-size: 15px; line-height: 1.6; color: var(--text); }
         .tiptap-body p { margin: 0 0 0.6em 0; }
-        .tiptap-body h1 { font-size: 1.4em; font-weight: 500; margin: 0.4em 0 0.3em; }
-        .tiptap-body h2 { font-size: 1.2em; font-weight: 500; margin: 0.4em 0 0.3em; }
-        .tiptap-body h3 { font-size: 1.05em; font-weight: 500; margin: 0.4em 0 0.3em; }
+        .tiptap-body h1 { font-size: 20px; font-weight: 500; margin: 0.4em 0 0.3em; color: var(--text); }
+        .tiptap-body h2 { font-size: 17px; font-weight: 500; margin: 0.4em 0 0.3em; color: var(--text); }
+        .tiptap-body h3 { font-size: 15px; font-weight: 500; margin: 0.4em 0 0.3em; color: var(--text); }
         .tiptap-body ul { padding-left: 1.25em; margin: 0.4em 0; list-style: disc; }
         .tiptap-body ol { padding-left: 1.25em; margin: 0.4em 0; list-style: decimal; }
         .tiptap-mention { background: var(--surface-raised); border-radius: 4px; padding: 0 4px; color: var(--text); }

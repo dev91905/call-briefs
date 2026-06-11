@@ -79,7 +79,7 @@ function PersonDetailPage() {
               <Link
                 to="/projects/$projectId/people/$personId"
                 params={{ projectId, personId: c.id }}
-                style={{ color: "var(--text)" }}
+                className="ref-link"
               >
                 {c.fullName}
               </Link>

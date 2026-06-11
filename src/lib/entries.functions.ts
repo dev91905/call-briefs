@@ -9,6 +9,7 @@ export type EntryListItem = {
   authorId: string;
   authorName: string | null;
   title: string;
+  dek: string | null;
   entryDate: string | null;
   body: string;
   status: "draft" | "published";
@@ -29,7 +30,7 @@ async function loadEntries(
   let query = supabase
     .from("entries")
     .select(
-      "id, project_id, author_id, title, entry_date, body, status, published_at, updated_at, created_at, " +
+      "id, project_id, author_id, title, dek, entry_date, body, status, published_at, updated_at, created_at, " +
         "projects!inner(name), " +
         "entry_people(person_id, role, people!inner(id, full_name)), " +
         "entry_groups(group_id, groups!inner(id, name)), " +
@@ -69,6 +70,7 @@ async function loadEntries(
       authorId: r.author_id,
       authorName: p?.full_name ?? p?.email ?? null,
       title: r.title,
+      dek: r.dek ?? null,
       entryDate: r.entry_date,
       body: r.body ?? "",
       status: r.status,
@@ -211,6 +213,7 @@ export const createDraft = createServerFn({ method: "POST" })
 const UpdateInput = z.object({
   id: z.string().uuid(),
   title: z.string().max(500).optional(),
+  dek: z.string().max(500).nullable().optional(),
   entryDate: z.string().nullable().optional(),
   body: z.string().max(50000).optional(),
   peopleIds: z.array(z.string().uuid()).optional(),
@@ -298,6 +301,7 @@ export const updateDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const patch: any = {};
     if (data.title !== undefined) patch.title = data.title.trim() || "Untitled";
+    if (data.dek !== undefined) patch.dek = data.dek?.trim() ? data.dek.trim() : null;
     if (data.entryDate !== undefined) patch.entry_date = data.entryDate;
     if (data.body !== undefined) patch.body = data.body;
     if (Object.keys(patch).length > 0) {
@@ -350,7 +354,7 @@ export const duplicateDraft = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: src, error } = await supabase
       .from("entries")
-      .select("project_id, title, entry_date, body")
+      .select("project_id, title, dek, entry_date, body")
       .eq("id", data.id)
       .maybeSingle();
     if (error || !src) throw new Error("Not found");
@@ -361,6 +365,7 @@ export const duplicateDraft = createServerFn({ method: "POST" })
         project_id: src.project_id,
         author_id: context.userId,
         title: src.title ? `${src.title} (copy)` : "Untitled",
+        dek: src.dek ?? null,
         entry_date: src.entry_date,
         body: src.body ?? "",
         status: "draft",

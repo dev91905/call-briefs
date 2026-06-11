@@ -134,25 +134,105 @@ export function RoleChip({ role }: { role: "owner" | "co_owner" | "member" }) {
 }
 
 function EntryFeedCard({ e }: { e: EntryListItem }) {
-  const preview = e.body.split(/\n\s*\n/)[0]?.slice(0, 200) ?? "";
+  const [open, setOpen] = useState(false);
   return (
-    <Link
-      to="/projects/$projectId"
-      params={{ projectId: e.projectId }}
-      className="block rounded-xl p-5"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+    <article
+      onClick={() => !open && setOpen(true)}
+      className="rounded-xl p-5"
+      style={{
+        background: "var(--surface)",
+        border: `1px solid ${open ? "var(--text-faint)" : "var(--border)"}`,
+        cursor: open ? "default" : "pointer",
+        position: "relative",
+      }}
     >
-      <h3 className="text-[16px] font-medium" style={{ color: "var(--text)" }}>{e.title}</h3>
-      <div className="mt-1 text-[11px]" style={{ color: "var(--text-faint)" }}>
-        {e.projectName} · {e.entryDate ? formatCallDate(e.entryDate) : relativeTime(e.publishedAt)}
-        {e.authorName ? ` · ${e.authorName}` : ""}
-      </div>
-      {preview && (
-        <p className="mt-3 line-clamp-2 text-[13px]" style={{ color: "var(--text-muted)" }}>
-          {preview}
-        </p>
+      {open && (
+        <button
+          onClick={(ev) => { ev.stopPropagation(); setOpen(false); }}
+          className="absolute right-4 top-4 text-[11px]"
+          style={{ color: "var(--text-faint)" }}
+        >
+          Collapse ✕
+        </button>
       )}
-    </Link>
+      <h3 className="text-[16px] font-medium" style={{ color: "var(--text)" }}>
+        <Link
+          to="/projects/$projectId"
+          params={{ projectId: e.projectId }}
+          onClick={(ev: any) => ev.stopPropagation()}
+          style={{ color: "var(--text)" }}
+        >
+          {e.title}
+        </Link>
+      </h3>
+      <FeedMeta e={e} />
+      {e.dek && !open && (
+        <p className="mt-3 text-[13px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
+      )}
+      {open && (
+        <div className="mt-4" onClick={(ev: any) => ev.stopPropagation()}>
+          {e.dek && (
+            <p className="mb-4 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
+          )}
+          <MarkdownBody body={e.body} />
+        </div>
+      )}
+    </article>
+  );
+}
+
+function FeedMeta({ e }: { e: EntryListItem }) {
+  return (
+    <div className="mt-1 text-[11px]" style={{ color: "var(--text-faint)" }}>
+      <Link
+        to="/projects/$projectId"
+        params={{ projectId: e.projectId }}
+        onClick={(ev: any) => ev.stopPropagation()}
+        style={{ color: "var(--text-muted)" }}
+      >
+        {e.projectName}
+      </Link>
+      {" · "}
+      {e.entryDate ? formatCallDate(e.entryDate) : relativeTime(e.publishedAt)}
+      {e.authorName ? ` · ${e.authorName}` : ""}
+      {e.participants.length > 0 && (
+        <>
+          {" · "}
+          {e.participants.map((p, i) => (
+            <span key={p.id}>
+              {i > 0 && ", "}
+              <Link
+                to="/projects/$projectId/people/$personId"
+                params={{ projectId: e.projectId, personId: p.id }}
+                onClick={(ev: any) => ev.stopPropagation()}
+                className="ref-link"
+              >
+                {p.fullName}
+              </Link>
+            </span>
+          ))}
+        </>
+      )}
+      {e.groups.length > 0 && (
+        <>
+          {" · groups: "}
+          {e.groups.map((g, i) => (
+            <span key={g.id}>
+              {i > 0 && ", "}
+              <Link
+                to="/projects/$projectId/groups/$groupId"
+                params={{ projectId: e.projectId, groupId: g.id }}
+                onClick={(ev: any) => ev.stopPropagation()}
+                className="ref-link"
+              >
+                {g.name}
+              </Link>
+            </span>
+          ))}
+        </>
+      )}
+      {e.tags.length > 0 ? ` · tags: ${e.tags.map((t) => t.name).join(", ")}` : ""}
+    </div>
   );
 }
 

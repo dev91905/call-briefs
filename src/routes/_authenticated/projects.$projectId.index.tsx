@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -224,19 +224,81 @@ function DraftRow({
 }
 
 function PublishedEntry({ e }: { e: EntryListItem }) {
+  const [open, setOpen] = useState(false);
+  const projectId = e.projectId;
   return (
-    <article className="border-b pb-8" style={{ borderColor: "var(--border)" }}>
+    <article
+      onClick={() => !open && setOpen(true)}
+      className="rounded-xl p-5"
+      style={{
+        background: "var(--surface)",
+        border: `1px solid ${open ? "var(--text-faint)" : "var(--border)"}`,
+        cursor: open ? "default" : "pointer",
+        position: "relative",
+      }}
+    >
+      {open && (
+        <button
+          onClick={(ev) => { ev.stopPropagation(); setOpen(false); }}
+          className="absolute right-4 top-4 text-[11px]"
+          style={{ color: "var(--text-faint)" }}
+        >
+          Collapse ✕
+        </button>
+      )}
       <h3 className="text-[20px] font-medium" style={{ color: "var(--text)" }}>{e.title}</h3>
       <div className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
         {e.entryDate ? formatCallDate(e.entryDate) : relativeTime(e.publishedAt)}
         {e.authorName ? ` · ${e.authorName}` : ""}
-        {e.participants.length > 0 ? ` · ${e.participants.map((p) => p.fullName).join(", ")}` : ""}
+        {e.participants.length > 0 && (
+          <>
+            {" · "}
+            {e.participants.map((p, i) => (
+              <span key={p.id}>
+                {i > 0 && ", "}
+                <Link
+                  to="/projects/$projectId/people/$personId"
+                  params={{ projectId, personId: p.id }}
+                  onClick={(ev: any) => ev.stopPropagation()}
+                  className="ref-link"
+                >
+                  {p.fullName}
+                </Link>
+              </span>
+            ))}
+          </>
+        )}
         {e.tags.length > 0 ? ` · tags: ${e.tags.map((t) => t.name).join(", ")}` : ""}
-        {e.groups.length > 0 ? ` · groups: ${e.groups.map((g) => g.name).join(", ")}` : ""}
+        {e.groups.length > 0 && (
+          <>
+            {" · groups: "}
+            {e.groups.map((g, i) => (
+              <span key={g.id}>
+                {i > 0 && ", "}
+                <Link
+                  to="/projects/$projectId/groups/$groupId"
+                  params={{ projectId, groupId: g.id }}
+                  onClick={(ev: any) => ev.stopPropagation()}
+                  className="ref-link"
+                >
+                  {g.name}
+                </Link>
+              </span>
+            ))}
+          </>
+        )}
       </div>
-      <div className="mt-4">
-        <MarkdownBody body={e.body} />
-      </div>
+      {e.dek && !open && (
+        <p className="mt-3 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
+      )}
+      {open && (
+        <div className="mt-4" onClick={(ev: any) => ev.stopPropagation()}>
+          {e.dek && (
+            <p className="mb-4 text-[15px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
+          )}
+          <MarkdownBody body={e.body} />
+        </div>
+      )}
     </article>
   );
 }
@@ -367,6 +429,7 @@ function EntryComposer({
 }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState(draft.title);
+  const [dek, setDek] = useState(draft.dek ?? "");
   const [entryDate, setEntryDate] = useState(draft.entryDate ?? "");
   const [body, setBody] = useState(draft.body);
   const [participants, setParticipants] = useState<{ id: string; fullName: string; isNew?: boolean }[]>(
@@ -407,6 +470,7 @@ function EntryComposer({
 
   const save = (patch: {
     title?: string;
+    dek?: string | null;
     entryDate?: string | null;
     body?: string;
     peopleIds?: string[];
@@ -418,6 +482,7 @@ function EntryComposer({
   const saveAll = () =>
     save({
       title: title.trim() || "Untitled",
+      dek: dek.trim() ? dek.trim() : null,
       entryDate: entryDate || null,
       body,
       peopleIds: participants.map((p) => p.id),
@@ -432,6 +497,7 @@ function EntryComposer({
         data: {
           id: draft.id,
           title: title.trim() || "Untitled",
+          dek: dek.trim() ? dek.trim() : null,
           entryDate: entryDate || null,
           body,
           peopleIds: participants.map((p) => p.id),
@@ -547,7 +613,19 @@ function EntryComposer({
             />
           </div>
         </div>
+        <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
+          <span>Dek</span>
+          <input
+            value={dek}
+            onChange={(e) => setDek(e.target.value)}
+            onBlur={() => save({ dek: dek.trim() ? dek.trim() : null })}
+            placeholder="One-line summary for the feed — optional"
+            className="flex-1 bg-transparent text-[13px] outline-none"
+            style={{ color: "var(--text)" }}
+          />
+        </div>
       </div>
+
 
       <TiptapBodyEditor
         projectId={projectId}
@@ -570,7 +648,7 @@ function EntryComposer({
         </button>
         <button
           onClick={handlePublish}
-          disabled={!canPublish || publish.isPending || update.isPending}
+          disabled={!canPublish || publish.isPending}
           className="h-10 rounded-md px-5 text-[13px] font-medium disabled:opacity-50"
           style={{ background: "var(--text)", color: "#000" }}
         >
