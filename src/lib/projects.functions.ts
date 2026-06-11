@@ -150,15 +150,23 @@ export const listMembers = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: rows, error } = await supabase
       .from("project_members")
-      .select("user_id, role, profiles!inner(email, full_name)")
+      .select("user_id, role")
       .eq("project_id", data.projectId);
     if (error) throw new Error(error.message);
-    const members = (rows ?? []).map((r: any) => ({
-      userId: r.user_id,
-      email: r.profiles.email,
-      fullName: r.profiles.full_name,
-      role: r.role,
-    }));
+    const userIds = (rows ?? []).map((r: any) => r.user_id);
+    const { data: profs } = userIds.length
+      ? await supabase.from("profiles").select("id, email, full_name").in("id", userIds)
+      : { data: [] as any[] };
+    const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+    const members = (rows ?? []).map((r: any) => {
+      const p = profMap.get(r.user_id);
+      return {
+        userId: r.user_id,
+        email: p?.email ?? "",
+        fullName: p?.full_name ?? null,
+        role: r.role,
+      };
+    });
     const { data: invites } = await supabase
       .from("pending_invites")
       .select("id, email, role")
