@@ -68,7 +68,17 @@ function ClientsAdminPage() {
 
       <div className="space-y-4">
         {(data ?? []).map((c) => (
-          <ClientRow key={c.id} client={c} onRename={(name) => rename.mutate({ data: { id: c.id, name } })} onInvite={(email) => invite.mutate({ data: { email, role: "client", clientId: c.id } })} />
+          <ClientRow
+            key={c.id}
+            client={c}
+            onRename={(name) => rename.mutate({ data: { id: c.id, name } })}
+            onInvite={(email) => invite.mutate({ data: { email, role: "client", clientId: c.id } })}
+            onDelete={() => {
+              if (confirm(`Delete "${c.name}"? This cannot be undone.`)) {
+                del.mutate({ data: { id: c.id } });
+              }
+            }}
+          />
         ))}
       </div>
 
