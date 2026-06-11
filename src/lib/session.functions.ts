@@ -18,9 +18,19 @@ export const getSessionInfo = createServerFn({ method: "GET" })
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("email, full_name, is_admin, client_id, clients(name)")
+      .select("email, full_name, is_admin, client_id")
       .eq("id", userId)
       .maybeSingle();
+
+    let clientName: string | null = null;
+    if (profile?.client_id) {
+      const { data: client } = await supabase
+        .from("clients")
+        .select("name")
+        .eq("id", profile.client_id)
+        .maybeSingle();
+      clientName = client?.name ?? null;
+    }
 
     const { data: roleRows } = await supabase
       .from("user_roles")
@@ -42,7 +52,7 @@ export const getSessionInfo = createServerFn({ method: "GET" })
       role,
       isAdmin: !!profile?.is_admin || roles.includes("admin"),
       clientId: profile?.client_id ?? null,
-      clientName: ((profile as any)?.clients?.name) ?? null,
+      clientName,
       fullName: profile?.full_name ?? null,
     };
     return result;
