@@ -58,7 +58,7 @@ export const updateBriefDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => UpdateInput.parse(input))
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = {};
+    const patch: { body?: string; call_title?: string; participants?: string } = {};
     if (data.body !== undefined) patch.body = data.body;
     if (data.callTitle !== undefined) patch.call_title = data.callTitle;
     if (data.participants !== undefined) patch.participants = data.participants;
