@@ -9,6 +9,25 @@ async function getClientNameMap(supabase: any, clientIds: (string | null | undef
   return new Map((data ?? []).map((client: any) => [client.id, client.name]));
 }
 
+export type BriefListItem = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  callTitle: string;
+  callDate: string | null;
+  participants: string;
+  body: string;
+};
+
+export type PublishedBriefListItem = BriefListItem & {
+  publishedAt: string | null;
+  hasReads: boolean;
+};
+
+export type DraftBriefListItem = BriefListItem & {
+  updatedAt: string;
+};
+
 export const getPendingBriefs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -20,7 +39,7 @@ export const getPendingBriefs = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
-    return (data ?? []).map((b: any) => ({
+    return (data ?? []).map((b: any): BriefListItem & { createdAt: string } => ({
       id: b.id,
       clientId: b.client_id,
       clientName: clientNameById.get(b.client_id) ?? "—",
@@ -43,7 +62,7 @@ export const getPublishedBriefs = createServerFn({ method: "GET" })
       .order("published_at", { ascending: false });
     if (error) throw new Error(error.message);
     const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
-    return (data ?? []).map((b: any) => ({
+    return (data ?? []).map((b: any): PublishedBriefListItem => ({
       id: b.id,
       clientId: b.client_id,
       clientName: clientNameById.get(b.client_id) ?? "—",
@@ -92,7 +111,7 @@ export const getDrafts = createServerFn({ method: "GET" })
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
     const clientNameById = await getClientNameMap(context.supabase, (data ?? []).map((b: any) => b.client_id));
-    return (data ?? []).map((b: any) => ({
+    return (data ?? []).map((b: any): DraftBriefListItem => ({
       id: b.id,
       clientId: b.client_id,
       clientName: clientNameById.get(b.client_id) ?? "—",
