@@ -429,6 +429,7 @@ function EntryComposer({
 }) {
   const qc = useQueryClient();
   const [title, setTitle] = useState(draft.title);
+  const [dek, setDek] = useState(draft.dek ?? "");
   const [entryDate, setEntryDate] = useState(draft.entryDate ?? "");
   const [body, setBody] = useState(draft.body);
   const [participants, setParticipants] = useState<{ id: string; fullName: string; isNew?: boolean }[]>(
