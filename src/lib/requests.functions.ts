@@ -34,22 +34,35 @@ export const listOpenRequests = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("requests")
       .select(
-        "id, message, status, created_at, brief_id, client_id, created_by, clients(name), briefs(call_title), profiles!requests_created_by_fkey(email, full_name)",
+        "id, message, status, created_at, brief_id, client_id, created_by, clients(name), briefs(call_title)",
       )
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
-      id: r.id,
-      message: r.message,
-      status: r.status,
-      createdAt: r.created_at,
-      briefId: r.brief_id,
-      briefTitle: r.briefs?.call_title ?? null,
-      clientName: r.clients?.name ?? "—",
-      clientId: r.client_id,
-      requesterEmail: r.profiles?.email ?? "",
-      requesterName: r.profiles?.full_name ?? null,
-    }));
+    const rows = data ?? [];
+    const creatorIds = Array.from(new Set(rows.map((r: any) => r.created_by).filter(Boolean)));
+    const profileMap = new Map<string, { email: string | null; full_name: string | null }>();
+    if (creatorIds.length > 0) {
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, email, full_name")
+        .in("id", creatorIds);
+      (profs ?? []).forEach((p: any) => profileMap.set(p.id, { email: p.email, full_name: p.full_name }));
+    }
+    return rows.map((r: any) => {
+      const p = profileMap.get(r.created_by);
+      return {
+        id: r.id,
+        message: r.message,
+        status: r.status,
+        createdAt: r.created_at,
+        briefId: r.brief_id,
+        briefTitle: r.briefs?.call_title ?? null,
+        clientName: r.clients?.name ?? "—",
+        clientId: r.client_id,
+        requesterEmail: p?.email ?? "",
+        requesterName: p?.full_name ?? null,
+      };
+    });
   });
 
 export const resolveRequest = createServerFn({ method: "POST" })
