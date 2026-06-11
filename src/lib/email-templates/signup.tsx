@@ -41,7 +41,7 @@ export const SignupEmail = ({
           !
         </Text>
         <Text style={text}>
-          Enter this 6-digit code in {siteName} to verify your email address (
+          Enter this 8-digit code in {siteName} to verify your email address (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
