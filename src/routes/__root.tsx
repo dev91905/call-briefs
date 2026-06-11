@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "../integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { getSessionInfo, type SessionInfo } from "../lib/session.functions";
+import { listOpenRequests } from "../lib/requests.functions";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function AppShell() {
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)" }}>
       {!isAuthPage && <TopBar />}
       <Outlet />
+      {!isAuthPage && <BottomBar />}
     </div>
   );
 }
@@ -146,12 +148,37 @@ function useSession() {
   });
 }
 
+function useOpenRequestCount(enabled: boolean) {
+  return useQuery({
+    queryKey: ["open-request-count"],
+    enabled,
+    queryFn: async () => {
+      const list = await listOpenRequests();
+      return list.filter((r) => r.status === "open").length;
+    },
+    refetchInterval: 60_000,
+  });
+}
+
 function TopBar() {
   const { data: session } = useSession();
+  const path = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (!session) return null;
+  const isAnalyst = session.role === "analyst" || session.role === "admin";
+  const openCount = useOpenRequestCount(isAnalyst).data ?? 0;
+
+  const tabs = isAnalyst
+    ? [
+        { to: "/", label: "Queue" },
+        { to: "/requests", label: "Requests", badge: openCount > 0 },
+        { to: "/published", label: "Published" },
+        ...(session.isAdmin ? [{ to: "/clients", label: "Clients" }] : []),
+        { to: "/settings", label: "Settings" },
+      ]
+    : [{ to: "/", label: "Briefs" }];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -170,8 +197,35 @@ function TopBar() {
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <div className="mx-auto flex h-12 max-w-[1280px] items-center justify-between px-6">
+      <div className="mx-auto flex h-12 max-w-[1100px] items-center justify-between px-6">
         <Link to="/" className="wordmark">Intelligence&nbsp;Portal</Link>
+
+        <nav className="hidden items-center gap-6 md:flex">
+          {tabs.map((t) => {
+            const active = t.to === "/" ? path === "/" : path.startsWith(t.to);
+            return (
+              <Link
+                key={t.to}
+                to={t.to}
+                className="relative text-[13px] font-medium"
+                style={{
+                  color: active ? "var(--text)" : "var(--text-faint)",
+                  paddingBottom: 14,
+                  marginTop: 14,
+                  borderBottom: active ? "1px solid #fff" : "1px solid transparent",
+                }}
+              >
+                {t.label}
+                {t.badge ? (
+                  <span
+                    className="dot dot-destructive"
+                    style={{ position: "absolute", top: 2, right: -10 }}
+                  />
+                ) : null}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="relative">
           <button
@@ -186,14 +240,6 @@ function TopBar() {
               className="absolute right-0 mt-2 w-48 rounded-md"
               style={{ background: "var(--surface-raised)", border: "1px solid var(--border)" }}
             >
-              <Link
-                to="/settings"
-                onClick={() => setMenuOpen(false)}
-                className="block w-full px-3 py-2 text-left text-[13px]"
-                style={{ color: "var(--text)" }}
-              >
-                Account settings
-              </Link>
               <button
                 onClick={handleSignOut}
                 className="block w-full px-3 py-2 text-left text-[13px]"
@@ -206,5 +252,53 @@ function TopBar() {
         </div>
       </div>
     </header>
+  );
+}
+
+function BottomBar() {
+  const { data: session } = useSession();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  if (!session) return null;
+  const isAnalyst = session.role === "analyst" || session.role === "admin";
+  if (!isAnalyst) return null;
+  const openCount = useOpenRequestCount(true).data ?? 0;
+
+  const tabs = [
+    { to: "/", label: "Queue" },
+    { to: "/requests", label: "Requests", badge: openCount > 0 },
+    { to: "/published", label: "Published" },
+    { to: "/settings", label: "Settings" },
+  ];
+
+  return (
+    <nav
+      className="md:hidden"
+      style={{
+        position: "sticky",
+        bottom: 0,
+        background: "rgba(0,0,0,0.9)",
+        borderTop: "1px solid var(--border)",
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <div className="flex h-14 items-center justify-around px-2">
+        {tabs.map((t) => {
+          const active = t.to === "/" ? path === "/" : path.startsWith(t.to);
+          return (
+            <Link
+              key={t.to}
+              to={t.to}
+              className="relative flex flex-col items-center justify-center text-[11px]"
+              style={{ color: active ? "var(--text)" : "var(--text-faint)" }}
+            >
+              {t.label}
+              {t.badge && (
+                <span className="dot dot-destructive" style={{ position: "absolute", top: 4, right: -8 }} />
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
