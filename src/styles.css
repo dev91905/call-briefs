@@ -189,3 +189,14 @@
     pointer-events: none;
   }
 }
+
+@layer utilities {
+  .ref-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+  }
+  .ref-link:hover {
+    border-bottom-color: var(--text-faint);
+  }
+}
