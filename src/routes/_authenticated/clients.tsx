@@ -7,6 +7,7 @@ import {
   createClientAdmin,
   renameClient,
   inviteUser,
+  deleteClient,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/clients")({
@@ -31,6 +32,11 @@ function ClientsAdminPage() {
   const invite = useMutation({
     mutationFn: useServerFn(inviteUser),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clients-admin"] }),
+  });
+  const del = useMutation({
+    mutationFn: useServerFn(deleteClient),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["clients-admin"] }),
+    onError: (e: Error) => alert(e.message),
   });
 
   const [newClientName, setNewClientName] = useState("");
@@ -62,7 +68,17 @@ function ClientsAdminPage() {
 
       <div className="space-y-4">
         {(data ?? []).map((c) => (
-          <ClientRow key={c.id} client={c} onRename={(name) => rename.mutate({ data: { id: c.id, name } })} onInvite={(email) => invite.mutate({ data: { email, role: "client", clientId: c.id } })} />
+          <ClientRow
+            key={c.id}
+            client={c}
+            onRename={(name) => rename.mutate({ data: { id: c.id, name } })}
+            onInvite={(email) => invite.mutate({ data: { email, role: "client", clientId: c.id } })}
+            onDelete={() => {
+              if (confirm(`Delete "${c.name}"? This cannot be undone.`)) {
+                del.mutate({ data: { id: c.id } });
+              }
+            }}
+          />
         ))}
       </div>
 
@@ -78,6 +94,7 @@ function ClientRow({
   client,
   onRename,
   onInvite,
+  onDelete,
 }: {
   client: {
     id: string;
@@ -87,6 +104,7 @@ function ClientRow({
   };
   onRename: (name: string) => void;
   onInvite: (email: string) => void;
+  onDelete: () => void;
 }) {
   const [name, setName] = useState(client.name);
   const [email, setEmail] = useState("");
@@ -112,6 +130,15 @@ function ClientRow({
         >
           Preview as client →
         </Link>
+        <button
+          onClick={onDelete}
+          aria-label="Delete client"
+          title="Delete client"
+          className="shrink-0 rounded-md px-2.5 py-1 text-[12px]"
+          style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--destructive, #f43f5e)" }}
+        >
+          Delete
+        </button>
       </div>
 
       <div className="mb-3">
