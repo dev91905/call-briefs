@@ -301,6 +301,7 @@ export const updateDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const patch: any = {};
     if (data.title !== undefined) patch.title = data.title.trim() || "Untitled";
+    if (data.dek !== undefined) patch.dek = data.dek?.trim() ? data.dek.trim() : null;
     if (data.entryDate !== undefined) patch.entry_date = data.entryDate;
     if (data.body !== undefined) patch.body = data.body;
     if (Object.keys(patch).length > 0) {
