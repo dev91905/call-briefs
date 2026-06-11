@@ -166,6 +166,39 @@ export const createClientAdmin = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const deleteClient = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [briefs, reqs, profs, maps] = await Promise.all([
+      supabaseAdmin.from("briefs").select("id", { count: "exact", head: true }).eq("client_id", data.id),
+      supabaseAdmin.from("requests").select("id", { count: "exact", head: true }).eq("client_id", data.id),
+      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }).eq("client_id", data.id),
+      supabaseAdmin.from("folder_mappings").select("id", { count: "exact", head: true }).eq("client_id", data.id),
+    ]);
+    const counts = [
+      ["brief", briefs.count ?? 0],
+      ["request", reqs.count ?? 0],
+      ["user", profs.count ?? 0],
+      ["folder mapping", maps.count ?? 0],
+    ] as const;
+    const blockers = counts.filter(([, n]) => n > 0);
+    if (blockers.length > 0) {
+      throw new Error(
+        "Cannot delete: client still has " +
+          blockers.map(([k, n]) => `${n} ${k}${n === 1 ? "" : "s"}`).join(", ") +
+          ". Reassign or remove them first.",
+      );
+    }
+
+    const { error } = await supabaseAdmin.from("clients").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const listClientsForSelect = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
