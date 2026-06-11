@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { loadEntries } from "@/lib/entries.functions";
 
 export type PersonSummary = {
   id: string;
@@ -57,7 +58,7 @@ export const getPersonDetail = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: person, error } = await supabase
       .from("people")
-      .select("id, full_name, project_id")
+      .select("id, full_name, project_id, created_at, created_by")
       .eq("id", data.personId)
       .eq("project_id", data.projectId)
       .maybeSingle();
@@ -66,14 +67,21 @@ export const getPersonDetail = createServerFn({ method: "POST" })
 
     const { data: links } = await supabase
       .from("entry_people")
-      .select("entries!inner(id, title, entry_date, body, status, published_at, author_id)")
+      .select("entry_id, role, entries!inner(id, title, entry_date, body, status, published_at, author_id)")
       .eq("person_id", data.personId);
 
-    const publishedEntries = ((links ?? []) as any[])
-      .map((l) => l.entries)
-      .filter((e) => e && e.status === "published");
+    const publishedLinks = ((links ?? []) as any[]).filter((l) => l.entries && l.entries.status === "published");
+    const publishedEntries = publishedLinks.map((l) => l.entries);
+    const entryIds = publishedEntries.map((e: any) => e.id);
+    const roleByEntryId = new Map<string, "participant" | "mentioned">();
+    publishedLinks.forEach((l) => roleByEntryId.set(l.entry_id, l.role));
 
-    const authorIds = Array.from(new Set(publishedEntries.map((e: any) => e.author_id).filter(Boolean)));
+    const authorIds = Array.from(
+      new Set([
+        ...publishedEntries.map((e: any) => e.author_id).filter(Boolean),
+        person.created_by,
+      ].filter(Boolean)),
+    );
     const profileMap = new Map<string, { full_name: string | null; email: string | null }>();
     if (authorIds.length > 0) {
       const { data: profs } = await supabase
@@ -85,23 +93,16 @@ export const getPersonDetail = createServerFn({ method: "POST" })
       }
     }
 
-    const entries = publishedEntries
-      .map((e: any) => {
-        const p = profileMap.get(e.author_id);
-        return {
-          id: e.id,
-          title: e.title,
-          entryDate: e.entry_date,
-          body: e.body ?? "",
-          publishedAt: e.published_at,
-          authorName: p?.full_name ?? p?.email ?? null,
-        };
-      })
+    const fullEntries = entryIds.length > 0 ? await loadEntries(supabase, { entryIds }) : [];
+    const entries = fullEntries
+      .map((e) => ({
+        ...e,
+        role: roleByEntryId.get(e.id) ?? "participant",
+      }))
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
 
     // Connections: co-occurrence on published entries.
-    const entryIds = publishedEntries.map((e: any) => e.id);
-    const connections: { id: string; fullName: string; mentionOnly: boolean }[] = [];
+    const connections: { id: string; fullName: string; mentionOnly: boolean; sharedCount: number }[] = [];
     if (entryIds.length > 0) {
       // role of this person on each entry
       const { data: myLinks } = await supabase
@@ -119,24 +120,42 @@ export const getPersonDetail = createServerFn({ method: "POST" })
         .neq("person_id", data.personId);
 
       // For each other person, determine if every shared entry was mention-only on both sides.
-      const byPerson = new Map<string, { name: string; allMention: boolean }>();
+      const byPerson = new Map<string, { name: string; allMention: boolean; sharedCount: number }>();
       ((coLinks ?? []) as any[]).forEach((r) => {
         const myRole = myRoleByEntry.get(r.entry_id) ?? "participant";
         const bothMention = myRole === "mentioned" && r.role === "mentioned";
         const cur = byPerson.get(r.person_id);
         if (cur) {
           if (!bothMention) cur.allMention = false;
+          cur.sharedCount += 1;
         } else {
-          byPerson.set(r.person_id, { name: r.people.full_name, allMention: bothMention });
+          byPerson.set(r.person_id, {
+            name: r.people.full_name,
+            allMention: bothMention,
+            sharedCount: 1,
+          });
         }
       });
       for (const [pid, v] of byPerson.entries()) {
-        connections.push({ id: pid, fullName: v.name, mentionOnly: v.allMention });
+        connections.push({ id: pid, fullName: v.name, mentionOnly: v.allMention, sharedCount: v.sharedCount });
       }
       connections.sort((a, b) => a.fullName.localeCompare(b.fullName));
     }
 
-    return { id: person.id, fullName: person.full_name, entries, connections };
+    const creator = person.created_by ? profileMap.get(person.created_by) : null;
+
+    return {
+      id: person.id,
+      fullName: person.full_name,
+      createdAt: person.created_at,
+      addedBy: creator?.full_name ?? creator?.email ?? null,
+      entryCount: entries.length,
+      entries,
+      connections,
+      groups: Array.from(new Map(entries.flatMap((e) => e.groups).map((g) => [g.id, g])).values()).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    };
   });
 
 export const suggestPeople = createServerFn({ method: "POST" })
