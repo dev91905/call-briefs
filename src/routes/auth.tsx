@@ -96,15 +96,15 @@ function AuthPage() {
         ) : (
           <form onSubmit={verifyCode} className="space-y-3">
             <label className="block text-[12px]" style={{ color: "var(--text-muted)" }}>
-              Six-digit code sent to {email}
+              Enter the code sent to {email}
             </label>
             <input
               required
               autoFocus
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
               inputMode="numeric"
-              placeholder="123456"
+              placeholder="12345678"
               className="block w-full rounded-md px-3 py-2.5 text-center text-[16px] tracking-[0.3em] outline-none tabular"
               style={{
                 background: "var(--surface-raised)",
@@ -114,7 +114,7 @@ function AuthPage() {
             />
             <button
               type="submit"
-              disabled={loading || code.length < 6}
+              disabled={loading || code.length < 8}
               className="block w-full rounded-md px-3 py-2.5 text-[14px] font-medium disabled:opacity-50"
               style={{ background: "var(--text)", color: "#000" }}
             >
