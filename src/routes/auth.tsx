@@ -36,14 +36,29 @@ function AuthPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: code.trim(),
-      type: "email",
-    });
+    const trimmedEmail = email.trim();
+    const trimmedCode = code.trim();
+
+    let verificationError: string | null = null;
+
+    for (const type of ["email", "magiclink"] as const) {
+      const { error } = await supabase.auth.verifyOtp({
+        email: trimmedEmail,
+        token: trimmedCode,
+        type,
+      });
+
+      if (!error) {
+        setLoading(false);
+        router.navigate({ to: "/" });
+        return;
+      }
+
+      verificationError = error.message;
+    }
+
     setLoading(false);
-    if (error) { setError(error.message); return; }
-    router.navigate({ to: "/" });
+    setError(verificationError ?? "Invalid code");
   };
 
   return (
