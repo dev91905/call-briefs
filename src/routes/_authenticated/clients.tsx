@@ -33,6 +33,11 @@ function ClientsAdminPage() {
     mutationFn: useServerFn(inviteUser),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clients-admin"] }),
   });
+  const del = useMutation({
+    mutationFn: useServerFn(deleteClient),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["clients-admin"] }),
+    onError: (e: Error) => alert(e.message),
+  });
 
   const [newClientName, setNewClientName] = useState("");
 
