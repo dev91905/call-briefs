@@ -144,10 +144,15 @@ export const getPersonDetail = createServerFn({ method: "POST" })
 
     const creator = person.created_by ? profileMap.get(person.created_by) : null;
 
+    const firstSeen = entries
+      .map((entry) => entry.entryDate ?? entry.publishedAt)
+      .filter(Boolean)
+      .sort((a, b) => (a ?? "").localeCompare(b ?? ""))[0] ?? person.created_at;
+
     return {
       id: person.id,
       fullName: person.full_name,
-      createdAt: person.created_at,
+      firstSeen,
       addedBy: creator?.full_name ?? creator?.email ?? null,
       entryCount: entries.length,
       entries,
