@@ -17,8 +17,7 @@ import { suggestPeople, createPerson } from "@/lib/people.functions";
 import { suggestGroups, createGroup } from "@/lib/groups.functions";
 import { suggestTags, createTag, topTagThisMonth, listProjectTags } from "@/lib/tags.functions";
 import { listProjectGroups } from "@/lib/groups.functions";
-import { MarkdownBody } from "@/components/portal/MarkdownBody";
-import { relativeTime, formatCallDate } from "@/lib/format";
+import { relativeTime } from "@/lib/format";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -283,6 +282,26 @@ function FeedFilter({
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
+      {tagIds.map((id) => {
+        const t = (tags.data ?? []).find((x) => x.id === id);
+        if (!t) return null;
+        return (
+          <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
+            tag: {t.name}
+            <button onClick={() => onTagsChange(tagIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
+          </span>
+        );
+      })}
+      {groupIds.map((id) => {
+        const g = (groups.data ?? []).find((x) => x.id === id);
+        if (!g) return null;
+        return (
+          <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
+            group: {g.name}
+            <button onClick={() => onGroupsChange(groupIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
+          </span>
+        );
+      })}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
@@ -375,26 +394,6 @@ function FeedFilter({
           </div>
         </PopoverContent>
       </Popover>
-      {tagIds.map((id) => {
-        const t = (tags.data ?? []).find((x) => x.id === id);
-        if (!t) return null;
-        return (
-          <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
-            tag: {t.name}
-            <button onClick={() => onTagsChange(tagIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
-          </span>
-        );
-      })}
-      {groupIds.map((id) => {
-        const g = (groups.data ?? []).find((x) => x.id === id);
-        if (!g) return null;
-        return (
-          <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
-            group: {g.name}
-            <button onClick={() => onGroupsChange(groupIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
-          </span>
-        );
-      })}
     </div>
   );
 }
