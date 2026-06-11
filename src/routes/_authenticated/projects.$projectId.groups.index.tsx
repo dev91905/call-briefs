@@ -17,7 +17,7 @@ import {
   ContextMenuItem,
 } from "@/components/ui/context-menu";
 
-export const Route = createFileRoute("/_authenticated/projects/$projectId/groups")({
+export const Route = createFileRoute("/_authenticated/projects/$projectId/groups/")({
   component: GroupsTab,
 });
 
