@@ -6,7 +6,9 @@ async function getClientNameMap(supabase: any, clientIds: (string | null | undef
   const ids = Array.from(new Set(clientIds.filter(Boolean))) as string[];
   if (ids.length === 0) return new Map<string, string>();
   const { data } = await supabase.from("clients").select("id, name").in("id", ids);
-  return new Map((data ?? []).map((client: any) => [client.id, client.name]));
+  return new Map<string, string>(
+    (data ?? []).map((client: any) => [String(client.id), String(client.name ?? "—")]),
+  );
 }
 
 export type BriefListItem = {
