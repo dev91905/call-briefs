@@ -203,7 +203,14 @@ function Editor({
     onSuccess: () => onPublished(),
   });
 
-  const saveField = (patch: Parameters<typeof updateBriefDraft>[0]["data"]) => {
+  type Patch = {
+    body?: string;
+    callTitle?: string;
+    participants?: string;
+    callDate?: string | null;
+    clientId?: string;
+  };
+  const saveField = (patch: Patch) => {
     update.mutate({ data: { id: draft.id, ...patch } });
   };
 
