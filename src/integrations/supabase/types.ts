@@ -106,6 +106,7 @@ export type Database = {
           author_id: string
           body: string
           created_at: string
+          dek: string | null
           entry_date: string | null
           id: string
           project_id: string
@@ -118,6 +119,7 @@ export type Database = {
           author_id: string
           body?: string
           created_at?: string
+          dek?: string | null
           entry_date?: string | null
           id?: string
           project_id: string
@@ -130,6 +132,7 @@ export type Database = {
           author_id?: string
           body?: string
           created_at?: string
+          dek?: string | null
           entry_date?: string | null
           id?: string
           project_id?: string
