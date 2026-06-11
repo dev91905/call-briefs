@@ -60,6 +60,8 @@ function ProjectLayout() {
       <nav className="mt-6 flex gap-6 border-b" style={{ borderColor: "var(--border)" }}>
         {tab(base, "Intelligence")}
         {tab(`${base}/people`, "People")}
+        {tab(`${base}/groups`, "Groups")}
+        {tab(`${base}/map`, "Map")}
         {tab(`${base}/settings`, "Settings")}
       </nav>
 
