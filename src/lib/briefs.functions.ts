@@ -47,21 +47,79 @@ export const getPublishedBriefs = createServerFn({ method: "GET" })
     }));
   });
 
+const CreateDraftInput = z.object({
+  clientId: z.string().uuid(),
+});
+
+export const createDraftBrief = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => CreateDraftInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const noteId = `manual-${crypto.randomUUID()}`;
+    const { data: row, error } = await context.supabase
+      .from("briefs")
+      .insert({
+        client_id: data.clientId,
+        analyst_id: context.userId,
+        granola_note_id: noteId,
+        call_title: "Untitled brief",
+        body: "",
+        status: "draft",
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id };
+  });
+
+export const getDrafts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("briefs")
+      .select("id, client_id, call_title, call_date, participants, body, created_at, updated_at, clients(name)")
+      .eq("analyst_id", context.userId)
+      .eq("status", "draft")
+      .order("updated_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((b: any) => ({
+      id: b.id,
+      clientId: b.client_id,
+      clientName: b.clients?.name ?? "—",
+      callTitle: b.call_title,
+      callDate: b.call_date,
+      participants: b.participants ?? "",
+      body: b.body ?? "",
+      updatedAt: b.updated_at,
+    }));
+  });
+
 const UpdateInput = z.object({
   id: z.string().uuid(),
   body: z.string().max(20000).optional(),
   callTitle: z.string().max(500).optional(),
   participants: z.string().max(1000).optional(),
+  callDate: z.string().nullable().optional(),
+  clientId: z.string().uuid().optional(),
 });
 
 export const updateBriefDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => UpdateInput.parse(input))
   .handler(async ({ data, context }) => {
-    const patch: { body?: string; call_title?: string; participants?: string } = {};
+    const patch: {
+      body?: string;
+      call_title?: string;
+      participants?: string;
+      call_date?: string | null;
+      client_id?: string;
+    } = {};
     if (data.body !== undefined) patch.body = data.body;
     if (data.callTitle !== undefined) patch.call_title = data.callTitle;
     if (data.participants !== undefined) patch.participants = data.participants;
+    if (data.callDate !== undefined) patch.call_date = data.callDate;
+    if (data.clientId !== undefined) patch.client_id = data.clientId;
+    if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await context.supabase
       .from("briefs")
       .update(patch)
@@ -80,7 +138,21 @@ export const publishBrief = createServerFn({ method: "POST" })
       .update({ status: "published", published_at: new Date().toISOString() })
       .eq("id", data.id)
       .eq("analyst_id", context.userId)
-      .eq("status", "pending");
+      .in("status", ["draft", "pending"]);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteDraftBrief = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("briefs")
+      .delete()
+      .eq("id", data.id)
+      .eq("analyst_id", context.userId)
+      .eq("status", "draft");
     if (error) throw new Error(error.message);
     return { ok: true };
   });
