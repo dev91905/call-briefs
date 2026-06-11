@@ -354,7 +354,7 @@ export const duplicateDraft = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: src, error } = await supabase
       .from("entries")
-      .select("project_id, title, entry_date, body")
+      .select("project_id, title, dek, entry_date, body")
       .eq("id", data.id)
       .maybeSingle();
     if (error || !src) throw new Error("Not found");
@@ -365,6 +365,7 @@ export const duplicateDraft = createServerFn({ method: "POST" })
         project_id: src.project_id,
         author_id: context.userId,
         title: src.title ? `${src.title} (copy)` : "Untitled",
+        dek: src.dek ?? null,
         entry_date: src.entry_date,
         body: src.body ?? "",
         status: "draft",
