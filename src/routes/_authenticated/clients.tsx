@@ -7,6 +7,7 @@ import {
   createClientAdmin,
   renameClient,
   inviteUser,
+  deleteClient,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/clients")({
