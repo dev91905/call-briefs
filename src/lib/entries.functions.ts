@@ -99,7 +99,7 @@ export const getEntry = createServerFn({ method: "POST" })
       .from("entries")
       .select(
         "id, project_id, author_id, title, entry_date, body, status, published_at, updated_at, created_at, " +
-          "projects!inner(name), profiles!entries_author_id_fkey(full_name, email), " +
+          "projects!inner(name), " +
           "entry_people(person_id, people!inner(id, full_name))",
       )
       .eq("id", data.id)
@@ -107,12 +107,21 @@ export const getEntry = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Not found");
     const r = row as any;
+    let authorName: string | null = null;
+    if (r.author_id) {
+      const { data: p } = await context.supabase
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", r.author_id)
+        .maybeSingle();
+      authorName = (p as any)?.full_name ?? (p as any)?.email ?? null;
+    }
     return {
       id: r.id,
       projectId: r.project_id,
       projectName: r.projects?.name ?? "",
       authorId: r.author_id,
-      authorName: r.profiles?.full_name ?? r.profiles?.email ?? null,
+      authorName,
       title: r.title,
       entryDate: r.entry_date,
       body: r.body ?? "",
@@ -126,6 +135,7 @@ export const getEntry = createServerFn({ method: "POST" })
       })),
     };
   });
+
 
 export const createDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
