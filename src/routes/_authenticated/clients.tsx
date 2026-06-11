@@ -96,13 +96,23 @@ function ClientRow({
       className="rounded-xl p-5"
       style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
     >
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        onBlur={() => { if (name && name !== client.name) onRename(name); }}
-        className="mb-3 block w-full bg-transparent text-[16px] font-semibold outline-none"
-        style={{ color: "var(--text)" }}
-      />
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => { if (name && name !== client.name) onRename(name); }}
+          className="flex-1 bg-transparent text-[16px] font-semibold outline-none"
+          style={{ color: "var(--text)" }}
+        />
+        <Link
+          to="/preview/$clientId"
+          params={{ clientId: client.id }}
+          className="shrink-0 rounded-md px-2.5 py-1 text-[12px]"
+          style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+        >
+          Preview as client →
+        </Link>
+      </div>
 
       <div className="mb-3">
         <div className="mb-1 text-[11px] uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Client users</div>
