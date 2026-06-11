@@ -24,7 +24,7 @@ export type EntryListItem = {
 };
 
 function normalizeSearch(raw: string | undefined) {
-  return raw?.trim().replace(/[,%()]/g, " ").replace(/\s+/g, " ").trim() ?? "";
+  return raw?.trim().replace(/[,%()'"\\]/g, " ").replace(/\s+/g, " ").trim() ?? "";
 }
 
 export async function loadEntries(
