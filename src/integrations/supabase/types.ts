@@ -14,106 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      brief_reads: {
-        Row: {
-          brief_id: string
-          client_user_id: string
-          read_at: string
-        }
-        Insert: {
-          brief_id: string
-          client_user_id: string
-          read_at?: string
-        }
-        Update: {
-          brief_id?: string
-          client_user_id?: string
-          read_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "brief_reads_brief_id_fkey"
-            columns: ["brief_id"]
-            isOneToOne: false
-            referencedRelation: "briefs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      briefs: {
-        Row: {
-          analyst_id: string
-          body: string
-          call_date: string | null
-          call_title: string
-          client_id: string
-          created_at: string
-          granola_note_id: string
-          id: string
-          participants: string | null
-          published_at: string | null
-          skip_reason: string | null
-          status: Database["public"]["Enums"]["brief_status"]
-          updated_at: string
-        }
-        Insert: {
-          analyst_id: string
-          body?: string
-          call_date?: string | null
-          call_title: string
-          client_id: string
-          created_at?: string
-          granola_note_id: string
-          id?: string
-          participants?: string | null
-          published_at?: string | null
-          skip_reason?: string | null
-          status?: Database["public"]["Enums"]["brief_status"]
-          updated_at?: string
-        }
-        Update: {
-          analyst_id?: string
-          body?: string
-          call_date?: string | null
-          call_title?: string
-          client_id?: string
-          created_at?: string
-          granola_note_id?: string
-          id?: string
-          participants?: string | null
-          published_at?: string | null
-          skip_reason?: string | null
-          status?: Database["public"]["Enums"]["brief_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "briefs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      clients: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       email_send_log: {
         Row: {
           created_at: string
@@ -201,64 +101,149 @@ export type Database = {
         }
         Relationships: []
       }
-      folder_mappings: {
+      entries: {
         Row: {
-          analyst_id: string
-          client_id: string
+          author_id: string
+          body: string
           created_at: string
-          granola_folder_id: string
-          granola_folder_name: string
+          entry_date: string | null
           id: string
+          project_id: string
+          published_at: string | null
+          status: Database["public"]["Enums"]["entry_status"]
+          title: string
+          updated_at: string
         }
         Insert: {
-          analyst_id: string
-          client_id: string
+          author_id: string
+          body?: string
           created_at?: string
-          granola_folder_id: string
-          granola_folder_name: string
+          entry_date?: string | null
           id?: string
+          project_id: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          title?: string
+          updated_at?: string
         }
         Update: {
-          analyst_id?: string
-          client_id?: string
+          author_id?: string
+          body?: string
           created_at?: string
-          granola_folder_id?: string
-          granola_folder_name?: string
+          entry_date?: string | null
           id?: string
+          project_id?: string
+          published_at?: string | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          title?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "folder_mappings_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "entries_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
       }
-      granola_connections: {
+      entry_people: {
         Row: {
-          analyst_id: string
-          api_key: string
-          created_at: string
-          id: string
-          last_polled_at: string | null
+          entry_id: string
+          person_id: string
         }
         Insert: {
-          analyst_id: string
-          api_key: string
-          created_at?: string
-          id?: string
-          last_polled_at?: string | null
+          entry_id: string
+          person_id: string
         }
         Update: {
-          analyst_id?: string
-          api_key?: string
-          created_at?: string
-          id?: string
-          last_polled_at?: string | null
+          entry_id?: string
+          person_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "entry_people_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entry_people_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+          project_id: string
+          role: Database["public"]["Enums"]["project_role"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+          project_id: string
+          role?: Database["public"]["Enums"]["project_role"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+          project_id?: string
+          role?: Database["public"]["Enums"]["project_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_invites_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          full_name: string
+          id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          full_name: string
+          id?: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          full_name?: string
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "people_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -285,66 +270,60 @@ export type Database = {
           id?: string
           is_admin?: boolean
         }
+        Relationships: []
+      }
+      project_members: {
+        Row: {
+          created_at: string
+          project_id: string
+          role: Database["public"]["Enums"]["project_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          project_id: string
+          role?: Database["public"]["Enums"]["project_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["project_role"]
+          user_id?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "profiles_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
       }
-      requests: {
+      projects: {
         Row: {
-          brief_id: string | null
-          client_id: string
           created_at: string
-          created_by: string
+          created_by: string | null
           id: string
-          message: string
-          resolved_at: string | null
-          resolved_by: string | null
-          status: Database["public"]["Enums"]["request_status"]
+          name: string
+          updated_at: string
         }
         Insert: {
-          brief_id?: string | null
-          client_id: string
           created_at?: string
-          created_by: string
+          created_by?: string | null
           id?: string
-          message: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          status?: Database["public"]["Enums"]["request_status"]
+          name: string
+          updated_at?: string
         }
         Update: {
-          brief_id?: string | null
-          client_id?: string
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           id?: string
-          message?: string
-          resolved_at?: string | null
-          resolved_by?: string | null
-          status?: Database["public"]["Enums"]["request_status"]
+          name?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "requests_brief_id_fkey"
-            columns: ["brief_id"]
-            isOneToOne: false
-            referencedRelation: "briefs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "requests_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       suppressed_emails: {
         Row: {
@@ -370,27 +349,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_roles: {
-        Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -404,17 +362,8 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
-      is_portal_admin: {
-        Args: { _portal: string; _user: string }
-        Returns: boolean
-      }
+      is_app_admin: { Args: never; Returns: boolean }
+      is_project_member: { Args: { _pid: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -423,6 +372,10 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      project_role_of: {
+        Args: { _pid: string }
+        Returns: Database["public"]["Enums"]["project_role"]
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
@@ -434,9 +387,8 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "analyst" | "client" | "admin"
-      brief_status: "draft" | "pending" | "published" | "rejected" | "skipped"
-      request_status: "open" | "resolved"
+      entry_status: "draft" | "published"
+      project_role: "owner" | "co_owner" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -564,9 +516,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["analyst", "client", "admin"],
-      brief_status: ["draft", "pending", "published", "rejected", "skipped"],
-      request_status: ["open", "resolved"],
+      entry_status: ["draft", "published"],
+      project_role: ["owner", "co_owner", "member"],
     },
   },
 } as const
