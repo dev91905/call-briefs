@@ -9,6 +9,7 @@ export type EntryListItem = {
   authorId: string;
   authorName: string | null;
   title: string;
+  dek: string | null;
   entryDate: string | null;
   body: string;
   status: "draft" | "published";
