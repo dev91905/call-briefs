@@ -30,7 +30,7 @@ async function loadEntries(
   let query = supabase
     .from("entries")
     .select(
-      "id, project_id, author_id, title, entry_date, body, status, published_at, updated_at, created_at, " +
+      "id, project_id, author_id, title, dek, entry_date, body, status, published_at, updated_at, created_at, " +
         "projects!inner(name), " +
         "entry_people(person_id, role, people!inner(id, full_name)), " +
         "entry_groups(group_id, groups!inner(id, name)), " +
