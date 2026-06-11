@@ -70,6 +70,7 @@ async function loadEntries(
       authorId: r.author_id,
       authorName: p?.full_name ?? p?.email ?? null,
       title: r.title,
+      dek: r.dek ?? null,
       entryDate: r.entry_date,
       body: r.body ?? "",
       status: r.status,
