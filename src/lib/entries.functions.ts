@@ -127,18 +127,25 @@ export const listFilteredEntries = createServerFn({ method: "POST" })
     const { data: idsRows } = await q;
     let entryIds = (idsRows ?? []).map((r: any) => r.id as string);
 
-    const intersect = async (table: string, col: string, ids: string[]) => {
-      if (!ids?.length || entryIds.length === 0) return;
+    if (data.tagIds?.length && entryIds.length > 0) {
       const { data: hit } = await supabase
-        .from(table)
+        .from("entry_tags")
         .select("entry_id")
-        .in(col, ids)
+        .in("tag_id", data.tagIds)
         .in("entry_id", entryIds);
-      const ok = new Set((hit ?? []).map((r: any) => r.entry_id));
+      const ok = new Set(((hit ?? []) as any[]).map((r) => r.entry_id as string));
       entryIds = entryIds.filter((id) => ok.has(id));
-    };
-    if (data.tagIds?.length) await intersect("entry_tags", "tag_id", data.tagIds);
-    if (data.groupIds?.length) await intersect("entry_groups", "group_id", data.groupIds);
+    }
+    if (data.groupIds?.length && entryIds.length > 0) {
+      const { data: hit } = await supabase
+        .from("entry_groups")
+        .select("entry_id")
+        .in("group_id", data.groupIds)
+        .in("entry_id", entryIds);
+      const ok = new Set(((hit ?? []) as any[]).map((r) => r.entry_id as string));
+      entryIds = entryIds.filter((id) => ok.has(id));
+    }
+
 
     if (entryIds.length === 0) return [];
     const list = await loadEntries(supabase, { entryIds });
