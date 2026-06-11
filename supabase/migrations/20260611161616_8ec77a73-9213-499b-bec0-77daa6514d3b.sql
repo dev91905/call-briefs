@@ -1,0 +1,1 @@
+ALTER TYPE public.brief_status ADD VALUE IF NOT EXISTS 'draft' BEFORE 'pending';
