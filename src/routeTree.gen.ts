@@ -20,9 +20,9 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as AuthenticatedProjectsProjectIdSettingsRouteImport } from './routes/_authenticated/projects.$projectId.settings'
-import { Route as AuthenticatedProjectsProjectIdPeopleRouteImport } from './routes/_authenticated/projects.$projectId.people'
 import { Route as AuthenticatedProjectsProjectIdMapRouteImport } from './routes/_authenticated/projects.$projectId.map'
-import { Route as AuthenticatedProjectsProjectIdGroupsRouteImport } from './routes/_authenticated/projects.$projectId.groups'
+import { Route as AuthenticatedProjectsProjectIdPeopleIndexRouteImport } from './routes/_authenticated/projects.$projectId.people.index'
+import { Route as AuthenticatedProjectsProjectIdGroupsIndexRouteImport } from './routes/_authenticated/projects.$projectId.groups.index'
 import { Route as AuthenticatedProjectsProjectIdPeoplePersonIdRouteImport } from './routes/_authenticated/projects.$projectId.people.$personId'
 import { Route as AuthenticatedProjectsProjectIdGroupsGroupIdRouteImport } from './routes/_authenticated/projects.$projectId.groups.$groupId'
 
@@ -85,35 +85,35 @@ const AuthenticatedProjectsProjectIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
-const AuthenticatedProjectsProjectIdPeopleRoute =
-  AuthenticatedProjectsProjectIdPeopleRouteImport.update({
-    id: '/people',
-    path: '/people',
-    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
-  } as any)
 const AuthenticatedProjectsProjectIdMapRoute =
   AuthenticatedProjectsProjectIdMapRouteImport.update({
     id: '/map',
     path: '/map',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
-const AuthenticatedProjectsProjectIdGroupsRoute =
-  AuthenticatedProjectsProjectIdGroupsRouteImport.update({
-    id: '/groups',
-    path: '/groups',
+const AuthenticatedProjectsProjectIdPeopleIndexRoute =
+  AuthenticatedProjectsProjectIdPeopleIndexRouteImport.update({
+    id: '/people/',
+    path: '/people/',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
+  } as any)
+const AuthenticatedProjectsProjectIdGroupsIndexRoute =
+  AuthenticatedProjectsProjectIdGroupsIndexRouteImport.update({
+    id: '/groups/',
+    path: '/groups/',
     getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
 const AuthenticatedProjectsProjectIdPeoplePersonIdRoute =
   AuthenticatedProjectsProjectIdPeoplePersonIdRouteImport.update({
-    id: '/$personId',
-    path: '/$personId',
-    getParentRoute: () => AuthenticatedProjectsProjectIdPeopleRoute,
+    id: '/people/$personId',
+    path: '/people/$personId',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
 const AuthenticatedProjectsProjectIdGroupsGroupIdRoute =
   AuthenticatedProjectsProjectIdGroupsGroupIdRouteImport.update({
-    id: '/$groupId',
-    path: '/$groupId',
-    getParentRoute: () => AuthenticatedProjectsProjectIdGroupsRoute,
+    id: '/groups/$groupId',
+    path: '/groups/$groupId',
+    getParentRoute: () => AuthenticatedProjectsProjectIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -122,9 +122,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/projects/new': typeof AuthenticatedProjectsNewRoute
-  '/projects/$projectId/groups': typeof AuthenticatedProjectsProjectIdGroupsRouteWithChildren
   '/projects/$projectId/map': typeof AuthenticatedProjectsProjectIdMapRoute
-  '/projects/$projectId/people': typeof AuthenticatedProjectsProjectIdPeopleRouteWithChildren
   '/projects/$projectId/settings': typeof AuthenticatedProjectsProjectIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -132,15 +130,15 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/groups/$groupId': typeof AuthenticatedProjectsProjectIdGroupsGroupIdRoute
   '/projects/$projectId/people/$personId': typeof AuthenticatedProjectsProjectIdPeoplePersonIdRoute
+  '/projects/$projectId/groups/': typeof AuthenticatedProjectsProjectIdGroupsIndexRoute
+  '/projects/$projectId/people/': typeof AuthenticatedProjectsProjectIdPeopleIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
   '/projects/new': typeof AuthenticatedProjectsNewRoute
-  '/projects/$projectId/groups': typeof AuthenticatedProjectsProjectIdGroupsRouteWithChildren
   '/projects/$projectId/map': typeof AuthenticatedProjectsProjectIdMapRoute
-  '/projects/$projectId/people': typeof AuthenticatedProjectsProjectIdPeopleRouteWithChildren
   '/projects/$projectId/settings': typeof AuthenticatedProjectsProjectIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -148,6 +146,8 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/projects/$projectId/groups/$groupId': typeof AuthenticatedProjectsProjectIdGroupsGroupIdRoute
   '/projects/$projectId/people/$personId': typeof AuthenticatedProjectsProjectIdPeoplePersonIdRoute
+  '/projects/$projectId/groups': typeof AuthenticatedProjectsProjectIdGroupsIndexRoute
+  '/projects/$projectId/people': typeof AuthenticatedProjectsProjectIdPeopleIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,9 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRouteWithChildren
   '/_authenticated/projects/new': typeof AuthenticatedProjectsNewRoute
-  '/_authenticated/projects/$projectId/groups': typeof AuthenticatedProjectsProjectIdGroupsRouteWithChildren
   '/_authenticated/projects/$projectId/map': typeof AuthenticatedProjectsProjectIdMapRoute
-  '/_authenticated/projects/$projectId/people': typeof AuthenticatedProjectsProjectIdPeopleRouteWithChildren
   '/_authenticated/projects/$projectId/settings': typeof AuthenticatedProjectsProjectIdSettingsRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -167,6 +165,8 @@ export interface FileRoutesById {
   '/_authenticated/projects/$projectId/': typeof AuthenticatedProjectsProjectIdIndexRoute
   '/_authenticated/projects/$projectId/groups/$groupId': typeof AuthenticatedProjectsProjectIdGroupsGroupIdRoute
   '/_authenticated/projects/$projectId/people/$personId': typeof AuthenticatedProjectsProjectIdPeoplePersonIdRoute
+  '/_authenticated/projects/$projectId/groups/': typeof AuthenticatedProjectsProjectIdGroupsIndexRoute
+  '/_authenticated/projects/$projectId/people/': typeof AuthenticatedProjectsProjectIdPeopleIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,9 +176,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/projects/$projectId'
     | '/projects/new'
-    | '/projects/$projectId/groups'
     | '/projects/$projectId/map'
-    | '/projects/$projectId/people'
     | '/projects/$projectId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -186,15 +184,15 @@ export interface FileRouteTypes {
     | '/projects/$projectId/'
     | '/projects/$projectId/groups/$groupId'
     | '/projects/$projectId/people/$personId'
+    | '/projects/$projectId/groups/'
+    | '/projects/$projectId/people/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/settings'
     | '/'
     | '/projects/new'
-    | '/projects/$projectId/groups'
     | '/projects/$projectId/map'
-    | '/projects/$projectId/people'
     | '/projects/$projectId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -202,6 +200,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/projects/$projectId/groups/$groupId'
     | '/projects/$projectId/people/$personId'
+    | '/projects/$projectId/groups'
+    | '/projects/$projectId/people'
   id:
     | '__root__'
     | '/_authenticated'
@@ -210,9 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/new'
-    | '/_authenticated/projects/$projectId/groups'
     | '/_authenticated/projects/$projectId/map'
-    | '/_authenticated/projects/$projectId/people'
     | '/_authenticated/projects/$projectId/settings'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -220,6 +218,8 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/$projectId/'
     | '/_authenticated/projects/$projectId/groups/$groupId'
     | '/_authenticated/projects/$projectId/people/$personId'
+    | '/_authenticated/projects/$projectId/groups/'
+    | '/_authenticated/projects/$projectId/people/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -309,13 +309,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdSettingsRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
-    '/_authenticated/projects/$projectId/people': {
-      id: '/_authenticated/projects/$projectId/people'
-      path: '/people'
-      fullPath: '/projects/$projectId/people'
-      preLoaderRoute: typeof AuthenticatedProjectsProjectIdPeopleRouteImport
-      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
-    }
     '/_authenticated/projects/$projectId/map': {
       id: '/_authenticated/projects/$projectId/map'
       path: '/map'
@@ -323,80 +316,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdMapRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
-    '/_authenticated/projects/$projectId/groups': {
-      id: '/_authenticated/projects/$projectId/groups'
+    '/_authenticated/projects/$projectId/people/': {
+      id: '/_authenticated/projects/$projectId/people/'
+      path: '/people'
+      fullPath: '/projects/$projectId/people/'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdPeopleIndexRouteImport
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
+    }
+    '/_authenticated/projects/$projectId/groups/': {
+      id: '/_authenticated/projects/$projectId/groups/'
       path: '/groups'
-      fullPath: '/projects/$projectId/groups'
-      preLoaderRoute: typeof AuthenticatedProjectsProjectIdGroupsRouteImport
+      fullPath: '/projects/$projectId/groups/'
+      preLoaderRoute: typeof AuthenticatedProjectsProjectIdGroupsIndexRouteImport
       parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
     '/_authenticated/projects/$projectId/people/$personId': {
       id: '/_authenticated/projects/$projectId/people/$personId'
-      path: '/$personId'
+      path: '/people/$personId'
       fullPath: '/projects/$projectId/people/$personId'
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdPeoplePersonIdRouteImport
-      parentRoute: typeof AuthenticatedProjectsProjectIdPeopleRoute
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
     '/_authenticated/projects/$projectId/groups/$groupId': {
       id: '/_authenticated/projects/$projectId/groups/$groupId'
-      path: '/$groupId'
+      path: '/groups/$groupId'
       fullPath: '/projects/$projectId/groups/$groupId'
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdGroupsGroupIdRouteImport
-      parentRoute: typeof AuthenticatedProjectsProjectIdGroupsRoute
+      parentRoute: typeof AuthenticatedProjectsProjectIdRoute
     }
   }
 }
 
-interface AuthenticatedProjectsProjectIdGroupsRouteChildren {
-  AuthenticatedProjectsProjectIdGroupsGroupIdRoute: typeof AuthenticatedProjectsProjectIdGroupsGroupIdRoute
-}
-
-const AuthenticatedProjectsProjectIdGroupsRouteChildren: AuthenticatedProjectsProjectIdGroupsRouteChildren =
-  {
-    AuthenticatedProjectsProjectIdGroupsGroupIdRoute:
-      AuthenticatedProjectsProjectIdGroupsGroupIdRoute,
-  }
-
-const AuthenticatedProjectsProjectIdGroupsRouteWithChildren =
-  AuthenticatedProjectsProjectIdGroupsRoute._addFileChildren(
-    AuthenticatedProjectsProjectIdGroupsRouteChildren,
-  )
-
-interface AuthenticatedProjectsProjectIdPeopleRouteChildren {
-  AuthenticatedProjectsProjectIdPeoplePersonIdRoute: typeof AuthenticatedProjectsProjectIdPeoplePersonIdRoute
-}
-
-const AuthenticatedProjectsProjectIdPeopleRouteChildren: AuthenticatedProjectsProjectIdPeopleRouteChildren =
-  {
-    AuthenticatedProjectsProjectIdPeoplePersonIdRoute:
-      AuthenticatedProjectsProjectIdPeoplePersonIdRoute,
-  }
-
-const AuthenticatedProjectsProjectIdPeopleRouteWithChildren =
-  AuthenticatedProjectsProjectIdPeopleRoute._addFileChildren(
-    AuthenticatedProjectsProjectIdPeopleRouteChildren,
-  )
-
 interface AuthenticatedProjectsProjectIdRouteChildren {
-  AuthenticatedProjectsProjectIdGroupsRoute: typeof AuthenticatedProjectsProjectIdGroupsRouteWithChildren
   AuthenticatedProjectsProjectIdMapRoute: typeof AuthenticatedProjectsProjectIdMapRoute
-  AuthenticatedProjectsProjectIdPeopleRoute: typeof AuthenticatedProjectsProjectIdPeopleRouteWithChildren
   AuthenticatedProjectsProjectIdSettingsRoute: typeof AuthenticatedProjectsProjectIdSettingsRoute
   AuthenticatedProjectsProjectIdIndexRoute: typeof AuthenticatedProjectsProjectIdIndexRoute
+  AuthenticatedProjectsProjectIdGroupsGroupIdRoute: typeof AuthenticatedProjectsProjectIdGroupsGroupIdRoute
+  AuthenticatedProjectsProjectIdPeoplePersonIdRoute: typeof AuthenticatedProjectsProjectIdPeoplePersonIdRoute
+  AuthenticatedProjectsProjectIdGroupsIndexRoute: typeof AuthenticatedProjectsProjectIdGroupsIndexRoute
+  AuthenticatedProjectsProjectIdPeopleIndexRoute: typeof AuthenticatedProjectsProjectIdPeopleIndexRoute
 }
 
 const AuthenticatedProjectsProjectIdRouteChildren: AuthenticatedProjectsProjectIdRouteChildren =
   {
-    AuthenticatedProjectsProjectIdGroupsRoute:
-      AuthenticatedProjectsProjectIdGroupsRouteWithChildren,
     AuthenticatedProjectsProjectIdMapRoute:
       AuthenticatedProjectsProjectIdMapRoute,
-    AuthenticatedProjectsProjectIdPeopleRoute:
-      AuthenticatedProjectsProjectIdPeopleRouteWithChildren,
     AuthenticatedProjectsProjectIdSettingsRoute:
       AuthenticatedProjectsProjectIdSettingsRoute,
     AuthenticatedProjectsProjectIdIndexRoute:
       AuthenticatedProjectsProjectIdIndexRoute,
+    AuthenticatedProjectsProjectIdGroupsGroupIdRoute:
+      AuthenticatedProjectsProjectIdGroupsGroupIdRoute,
+    AuthenticatedProjectsProjectIdPeoplePersonIdRoute:
+      AuthenticatedProjectsProjectIdPeoplePersonIdRoute,
+    AuthenticatedProjectsProjectIdGroupsIndexRoute:
+      AuthenticatedProjectsProjectIdGroupsIndexRoute,
+    AuthenticatedProjectsProjectIdPeopleIndexRoute:
+      AuthenticatedProjectsProjectIdPeopleIndexRoute,
   }
 
 const AuthenticatedProjectsProjectIdRouteWithChildren =
@@ -432,3 +408,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
