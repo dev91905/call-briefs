@@ -23,9 +23,19 @@ export type EntryListItem = {
   tags: { id: string; name: string }[];
 };
 
-async function loadEntries(
+function normalizeSearch(raw: string | undefined) {
+  return raw?.trim().replace(/[,%()'"\\]/g, " ").replace(/\s+/g, " ").trim() ?? "";
+}
+
+export async function loadEntries(
   supabase: any,
-  opts: { projectId?: string; status?: "draft" | "published"; authorId?: string; entryIds?: string[] },
+  opts: {
+    projectId?: string;
+    status?: "draft" | "published";
+    authorId?: string;
+    entryIds?: string[];
+    search?: string;
+  },
 ) {
   let query = supabase
     .from("entries")
@@ -40,6 +50,11 @@ async function loadEntries(
   if (opts.status) query = query.eq("status", opts.status);
   if (opts.authorId) query = query.eq("author_id", opts.authorId);
   if (opts.entryIds) query = query.in("id", opts.entryIds);
+  const normalizedSearch = normalizeSearch(opts.search);
+  if (normalizedSearch) {
+    const q = normalizedSearch;
+    query = query.or(`title.ilike.%${q}%,dek.ilike.%${q}%,body.ilike.%${q}%`);
+  }
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   const rows = (data ?? []) as any[];
@@ -92,14 +107,24 @@ async function loadEntries(
 
 export const listProjectEntries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ projectId: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ projectId: z.string().uuid(), search: z.string().max(200).optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
-    const all = await loadEntries(context.supabase, { projectId: data.projectId });
-    const published = all
-      .filter((e) => e.status === "published")
+    const publishedRows = await loadEntries(context.supabase, {
+      projectId: data.projectId,
+      status: "published",
+      search: data.search,
+    });
+    const draftRows = await loadEntries(context.supabase, {
+      projectId: data.projectId,
+      status: "draft",
+      authorId: context.userId,
+    });
+
+    const published = publishedRows
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
-    const myDrafts = all
-      .filter((e) => e.status === "draft" && e.authorId === context.userId)
+    const myDrafts = draftRows
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return { published, myDrafts };
   });
@@ -112,6 +137,7 @@ export const listFilteredEntries = createServerFn({ method: "POST" })
         projectId: z.string().uuid(),
         tagIds: z.array(z.string().uuid()).optional(),
         groupIds: z.array(z.string().uuid()).optional(),
+          search: z.string().max(200).optional(),
         from: z.string().nullable().optional(),
         to: z.string().nullable().optional(),
       })
@@ -124,6 +150,10 @@ export const listFilteredEntries = createServerFn({ method: "POST" })
       .select("id")
       .eq("project_id", data.projectId)
       .eq("status", "published");
+    const search = normalizeSearch(data.search);
+    if (search) {
+      q = q.or(`title.ilike.%${search}%,dek.ilike.%${search}%,body.ilike.%${search}%`);
+    }
     if (data.from) q = q.gte("published_at", data.from);
     if (data.to) q = q.lte("published_at", data.to);
     const { data: idsRows } = await q;

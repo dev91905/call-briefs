@@ -3,10 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { getGroup, renameGroup, deleteGroup } from "@/lib/groups.functions";
-import { listGroupEntries, type EntryListItem } from "@/lib/entries.functions";
+import { listGroupEntries } from "@/lib/entries.functions";
 import { getProject } from "@/lib/projects.functions";
-import { MarkdownBody } from "@/components/portal/MarkdownBody";
-import { relativeTime, formatCallDate } from "@/lib/format";
+import { relativeTime } from "@/lib/format";
+import { ProjectEntryCard } from "@/components/portal/ProjectEntryCard";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/groups/$groupId")({
   component: GroupPage,
@@ -56,7 +56,7 @@ function GroupPage() {
   const list = entries.data ?? [];
 
   return (
-    <div>
+    <div className="mx-auto max-w-[620px]">
       <Link
         to="/projects/$projectId/groups"
         params={{ projectId }}
@@ -65,9 +65,17 @@ function GroupPage() {
       >
         ← Groups
       </Link>
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3 flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
         {!renaming ? (
-          <h2 className="text-[22px] font-medium" style={{ color: "var(--text)" }}>{group.data.name}</h2>
+            <>
+              <h2 className="text-[22px] font-medium" style={{ color: "var(--text)" }}>{group.data.name}</h2>
+              <div className="mt-2 text-[12px]" style={{ color: "var(--text-faint)" }}>
+                {group.data.entryCount} {group.data.entryCount === 1 ? "entry" : "entries"}
+                {group.data.createdBy ? ` · created by ${group.data.createdBy}` : ""}
+                {group.data.lastActivity ? ` · last activity ${relativeTime(group.data.lastActivity)}` : ""}
+              </div>
+            </>
         ) : (
           <form
             onSubmit={(e) => {
@@ -88,6 +96,7 @@ function GroupPage() {
             <button type="button" onClick={() => setRenaming(false)} className="text-[12px]" style={{ color: "var(--text-faint)" }}>Cancel</button>
           </form>
         )}
+        </div>
         {canManage && !renaming && (
           <div className="relative">
             <button
@@ -126,30 +135,21 @@ function GroupPage() {
         )}
       </div>
 
-      <div className="mt-6 space-y-8">
+      <section className="mt-8">
+        <div
+          className="mb-3 text-[11px] font-medium uppercase tracking-wider"
+          style={{ color: "var(--text-faint)" }}
+        >
+          Intelligence
+        </div>
+      <div className="space-y-4">
         {list.length === 0 ? (
           <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>No published entries in this group yet.</p>
         ) : (
-          list.map((e) => <GroupEntry key={e.id} e={e} />)
+          list.map((e) => <ProjectEntryCard key={e.id} e={e} />)
         )}
       </div>
+      </section>
     </div>
-  );
-}
-
-function GroupEntry({ e }: { e: EntryListItem }) {
-  return (
-    <article className="border-b pb-8" style={{ borderColor: "var(--border)" }}>
-      <h3 className="text-[18px] font-medium" style={{ color: "var(--text)" }}>{e.title}</h3>
-      <div className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
-        {e.entryDate ? formatCallDate(e.entryDate) : relativeTime(e.publishedAt)}
-        {e.authorName ? ` · ${e.authorName}` : ""}
-        {e.participants.length > 0 ? ` · ${e.participants.map((p) => p.fullName).join(", ")}` : ""}
-        {e.tags.length > 0 ? ` · tags: ${e.tags.map((t) => t.name).join(", ")}` : ""}
-      </div>
-      <div className="mt-4">
-        <MarkdownBody body={e.body} />
-      </div>
-    </article>
   );
 }

@@ -17,8 +17,7 @@ import { suggestPeople, createPerson } from "@/lib/people.functions";
 import { suggestGroups, createGroup } from "@/lib/groups.functions";
 import { suggestTags, createTag, topTagThisMonth, listProjectTags } from "@/lib/tags.functions";
 import { listProjectGroups } from "@/lib/groups.functions";
-import { MarkdownBody } from "@/components/portal/MarkdownBody";
-import { relativeTime, formatCallDate } from "@/lib/format";
+import { relativeTime } from "@/lib/format";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/context-menu";
 import { TiptapBodyEditor } from "@/components/portal/TiptapBodyEditor";
 import { extractMentionIds } from "@/lib/tiptap-markdown";
+import { ProjectEntryCard } from "@/components/portal/ProjectEntryCard";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   component: IntelligenceTab,
@@ -37,10 +37,17 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
 function IntelligenceTab() {
   const { projectId } = Route.useParams();
   const qc = useQueryClient();
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearch(searchInput.trim()), 250);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
   const list = useQuery({
-    queryKey: ["project-entries", projectId],
-    queryFn: () => listProjectEntries({ data: { projectId } }),
+    queryKey: ["project-entries", projectId, search],
+    queryFn: () => listProjectEntries({ data: { projectId, search } }),
   });
   const topTag = useQuery({
     queryKey: ["top-tag", projectId],
@@ -68,11 +75,12 @@ function IntelligenceTab() {
   const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
   const [filterGroupIds, setFilterGroupIds] = useState<string[]>([]);
   const filterActive = filterTagIds.length + filterGroupIds.length > 0;
+  const searchActive = search.length > 0;
   const filtered = useQuery({
-    queryKey: ["filtered-entries", projectId, filterTagIds, filterGroupIds],
+    queryKey: ["filtered-entries", projectId, filterTagIds, filterGroupIds, search],
     queryFn: () =>
       listFilteredEntries({
-        data: { projectId, tagIds: filterTagIds, groupIds: filterGroupIds },
+        data: { projectId, tagIds: filterTagIds, groupIds: filterGroupIds, search },
       }),
     enabled: filterActive,
   });
@@ -141,14 +149,27 @@ function IntelligenceTab() {
       )}
 
       <section>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2
             className="text-[12px] font-medium uppercase tracking-wider"
             style={{ color: "var(--text-faint)" }}
           >
             Published
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <label
+              className="flex h-9 w-[200px] items-center gap-2 rounded-md px-3 transition-[width] duration-150 focus-within:w-[280px]"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            >
+              <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>⌕</span>
+              <input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search intelligence…"
+                className="w-full bg-transparent text-[12px] outline-none placeholder:opacity-100"
+                style={{ color: "var(--text)", caretColor: "var(--text)" }}
+              />
+            </label>
             {topTag.data && (
               <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
                 Most active this month: <span style={{ color: "var(--text-muted)" }}>{topTag.data.name}</span>
@@ -165,7 +186,7 @@ function IntelligenceTab() {
         </div>
         {published.length === 0 ? (
           <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
-            {filterActive ? "No published entries match." : "Nothing published yet. Add intelligence to share with your project."}
+            {filterActive || searchActive ? "Nothing matches." : "Nothing published yet. Add intelligence to share with your project."}
           </p>
         ) : (
           <div className="space-y-8">
@@ -224,83 +245,7 @@ function DraftRow({
 }
 
 function PublishedEntry({ e }: { e: EntryListItem }) {
-  const [open, setOpen] = useState(false);
-  const projectId = e.projectId;
-  return (
-    <article
-      onClick={() => !open && setOpen(true)}
-      className="rounded-xl p-5"
-      style={{
-        background: "var(--surface)",
-        border: `1px solid ${open ? "var(--text-faint)" : "var(--border)"}`,
-        cursor: open ? "default" : "pointer",
-        position: "relative",
-      }}
-    >
-      {open && (
-        <button
-          onClick={(ev) => { ev.stopPropagation(); setOpen(false); }}
-          className="absolute right-4 top-4 text-[11px]"
-          style={{ color: "var(--text-faint)" }}
-        >
-          Collapse ✕
-        </button>
-      )}
-      <h3 className="text-[20px] font-medium" style={{ color: "var(--text)" }}>{e.title}</h3>
-      <div className="mt-1 text-[12px]" style={{ color: "var(--text-faint)" }}>
-        {e.entryDate ? formatCallDate(e.entryDate) : relativeTime(e.publishedAt)}
-        {e.authorName ? ` · ${e.authorName}` : ""}
-        {e.participants.length > 0 && (
-          <>
-            {" · "}
-            {e.participants.map((p, i) => (
-              <span key={p.id}>
-                {i > 0 && ", "}
-                <Link
-                  to="/projects/$projectId/people/$personId"
-                  params={{ projectId, personId: p.id }}
-                  onClick={(ev: any) => ev.stopPropagation()}
-                  className="ref-link"
-                >
-                  {p.fullName}
-                </Link>
-              </span>
-            ))}
-          </>
-        )}
-        {e.tags.length > 0 ? ` · tags: ${e.tags.map((t) => t.name).join(", ")}` : ""}
-        {e.groups.length > 0 && (
-          <>
-            {" · groups: "}
-            {e.groups.map((g, i) => (
-              <span key={g.id}>
-                {i > 0 && ", "}
-                <Link
-                  to="/projects/$projectId/groups/$groupId"
-                  params={{ projectId, groupId: g.id }}
-                  onClick={(ev: any) => ev.stopPropagation()}
-                  className="ref-link"
-                >
-                  {g.name}
-                </Link>
-              </span>
-            ))}
-          </>
-        )}
-      </div>
-      {e.dek && !open && (
-        <p className="mt-3 text-[14px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
-      )}
-      {open && (
-        <div className="mt-4" onClick={(ev: any) => ev.stopPropagation()}>
-          {e.dek && (
-            <p className="mb-4 text-[15px]" style={{ color: "var(--text-muted)" }}>{e.dek}</p>
-          )}
-          <MarkdownBody body={e.body} />
-        </div>
-      )}
-    </article>
-  );
+  return <ProjectEntryCard e={e} />;
 }
 
 function FeedFilter({
@@ -336,66 +281,13 @@ function FeedFilter({
     fn(set.includes(id) ? set.filter((x) => x !== id) : [...set, id]);
 
   return (
-    <div className="flex items-center gap-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className="rounded-md px-3 py-1.5 text-[12px]"
-            style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}
-          >
-            Filter{tagIds.length + groupIds.length > 0 ? ` (${tagIds.length + groupIds.length})` : ""}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-72 p-3">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search"
-            className="mb-2 block w-full rounded-md px-2 py-1 text-[12px] outline-none"
-            style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}
-          />
-          <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Tags</div>
-          <div className="mb-2 max-h-40 overflow-auto">
-            {tagList.length === 0 ? (
-              <p className="px-1 py-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>—</p>
-            ) : (
-              tagList.map((t) => (
-                <label key={t.id} className="flex items-center gap-2 px-1 py-0.5 text-[12px]" style={{ color: "var(--text)" }}>
-                  <input
-                    type="checkbox"
-                    checked={tagIds.includes(t.id)}
-                    onChange={() => toggle(tagIds, t.id, onTagsChange)}
-                  />
-                  {t.name}
-                </label>
-              ))
-            )}
-          </div>
-          <div className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Groups</div>
-          <div className="max-h-40 overflow-auto">
-            {groupList.length === 0 ? (
-              <p className="px-1 py-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>—</p>
-            ) : (
-              groupList.map((g) => (
-                <label key={g.id} className="flex items-center gap-2 px-1 py-0.5 text-[12px]" style={{ color: "var(--text)" }}>
-                  <input
-                    type="checkbox"
-                    checked={groupIds.includes(g.id)}
-                    onChange={() => toggle(groupIds, g.id, onGroupsChange)}
-                  />
-                  {g.name}
-                </label>
-              ))
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
+    <div className="flex flex-wrap items-center justify-end gap-2">
       {tagIds.map((id) => {
         const t = (tags.data ?? []).find((x) => x.id === id);
         if (!t) return null;
         return (
           <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
-            {t.name}
+            tag: {t.name}
             <button onClick={() => onTagsChange(tagIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
           </span>
         );
@@ -405,11 +297,103 @@ function FeedFilter({
         if (!g) return null;
         return (
           <span key={id} className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]" style={{ background: "var(--surface-raised)", color: "var(--text)" }}>
-            {g.name}
+            group: {g.name}
             <button onClick={() => onGroupsChange(groupIds.filter((x) => x !== id))} style={{ color: "var(--text-faint)" }}>×</button>
           </span>
         );
       })}
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className="rounded-md px-3 py-1.5 text-[12px]"
+            style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}
+          >
+            Filter{tagIds.length + groupIds.length > 0 ? ` (${tagIds.length + groupIds.length})` : ""}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="end"
+          className="w-80 p-2"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Find a tag or group…"
+            className="mb-2 block w-full rounded-md px-3 py-2 text-[12px] outline-none"
+            style={{ background: "var(--surface-raised)", border: "1px solid var(--border)", color: "var(--text)" }}
+          />
+          <div className="px-1 text-[10px] uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Tags</div>
+          <div className="mb-2 max-h-40 overflow-auto">
+            {tagList.length === 0 ? (
+              <p className="px-1 py-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>—</p>
+            ) : (
+              tagList.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => toggle(tagIds, t.id, onTagsChange)}
+                  className="flex w-full items-center justify-between rounded-md px-3 py-2 text-[12px]"
+                  style={{
+                    color: "var(--text)",
+                    background: tagIds.includes(t.id) ? "rgba(255,255,255,0.06)" : "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!tagIds.includes(t.id)) e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!tagIds.includes(t.id)) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <span>{t.name}</span>
+                  <span style={{ color: tagIds.includes(t.id) ? "var(--text)" : "transparent" }}>✓</span>
+                </button>
+              ))
+            )}
+          </div>
+          <div className="px-1 text-[10px] uppercase tracking-wider" style={{ color: "var(--text-faint)" }}>Groups</div>
+          <div className="max-h-40 overflow-auto">
+            {groupList.length === 0 ? (
+              <p className="px-1 py-0.5 text-[12px]" style={{ color: "var(--text-faint)" }}>—</p>
+            ) : (
+              groupList.map((g) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => toggle(groupIds, g.id, onGroupsChange)}
+                  className="flex w-full items-center justify-between rounded-md px-3 py-2 text-[12px]"
+                  style={{
+                    color: "var(--text)",
+                    background: groupIds.includes(g.id) ? "rgba(255,255,255,0.06)" : "transparent",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!groupIds.includes(g.id)) e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!groupIds.includes(g.id)) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <span>{g.name}</span>
+                  <span style={{ color: groupIds.includes(g.id) ? "var(--text)" : "transparent" }}>✓</span>
+                </button>
+              ))
+            )}
+          </div>
+          <div className="mt-2 border-t pt-2" style={{ borderColor: "var(--border)" }}>
+            <button
+              type="button"
+              onClick={() => {
+                onTagsChange([]);
+                onGroupsChange([]);
+              }}
+              className="w-full rounded-md px-3 py-2 text-left text-[12px]"
+              style={{ color: "var(--text-faint)" }}
+            >
+              Clear all
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

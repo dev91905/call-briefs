@@ -12,7 +12,7 @@ import {
   ContextMenuItem,
 } from "@/components/ui/context-menu";
 
-export const Route = createFileRoute("/_authenticated/projects/$projectId/people")({
+export const Route = createFileRoute("/_authenticated/projects/$projectId/people/")({
   component: PeopleTab,
 });
 
