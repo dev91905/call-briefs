@@ -63,7 +63,7 @@ function Compose() {
 
   const create = useMutation({
     mutationFn: useServerFn(createDraftBrief),
-    onSuccess: (res) => {
+    onSuccess: (res: { id: string }) => {
       qc.invalidateQueries({ queryKey: ["drafts"] });
       setActiveId(res.id);
     },
