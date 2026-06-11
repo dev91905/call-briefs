@@ -23,6 +23,10 @@ export type EntryListItem = {
   tags: { id: string; name: string }[];
 };
 
+function normalizeSearch(raw: string | undefined) {
+  return raw?.trim().replace(/[,%()]/g, " ").replace(/\s+/g, " ").trim() ?? "";
+}
+
 export async function loadEntries(
   supabase: any,
   opts: {
@@ -46,8 +50,9 @@ export async function loadEntries(
   if (opts.status) query = query.eq("status", opts.status);
   if (opts.authorId) query = query.eq("author_id", opts.authorId);
   if (opts.entryIds) query = query.in("id", opts.entryIds);
-  if (opts.search?.trim()) {
-    const q = opts.search.trim();
+  const normalizedSearch = normalizeSearch(opts.search);
+  if (normalizedSearch) {
+    const q = normalizedSearch;
     query = query.or(`title.ilike.%${q}%,dek.ilike.%${q}%,body.ilike.%${q}%`);
   }
   const { data, error } = await query;
@@ -106,15 +111,20 @@ export const listProjectEntries = createServerFn({ method: "POST" })
     z.object({ projectId: z.string().uuid(), search: z.string().max(200).optional() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const all = await loadEntries(context.supabase, {
+    const publishedRows = await loadEntries(context.supabase, {
       projectId: data.projectId,
+      status: "published",
       search: data.search,
     });
-    const published = all
-      .filter((e) => e.status === "published")
+    const draftRows = await loadEntries(context.supabase, {
+      projectId: data.projectId,
+      status: "draft",
+      authorId: context.userId,
+    });
+
+    const published = publishedRows
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
-    const myDrafts = all
-      .filter((e) => e.status === "draft" && e.authorId === context.userId)
+    const myDrafts = draftRows
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return { published, myDrafts };
   });
@@ -140,8 +150,8 @@ export const listFilteredEntries = createServerFn({ method: "POST" })
       .select("id")
       .eq("project_id", data.projectId)
       .eq("status", "published");
-    if (data.search?.trim()) {
-      const search = data.search.trim();
+    const search = normalizeSearch(data.search);
+    if (search) {
       q = q.or(`title.ilike.%${search}%,dek.ilike.%${search}%,body.ilike.%${search}%`);
     }
     if (data.from) q = q.gte("published_at", data.from);
